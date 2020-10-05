@@ -12,7 +12,7 @@ DRAIN_BUFFER_SLEEP_TIME = 500.0  # millisec
 PACKET_PAYLOAD_PORTION = 0.95
 LINK_RTT = 80  # millisec
 PACKET_SIZE = 1500  # bytes
-VIDEO_SIZE_FILE = './video_size_'
+VIDEO_SIZE_FILE = '../data/video_sizes/video_size_'
 
 
 class Environment:
@@ -39,7 +39,7 @@ class Environment:
         self.last_mahimahi_time = self.cooked_time[self.mahimahi_ptr - 1]
 
         self.video_size = {}  # in bytes
-        for bitrate in xrange(BITRATE_LEVELS):
+        for bitrate in range(BITRATE_LEVELS):
             self.video_size[bitrate] = []
             with open(VIDEO_SIZE_FILE + str(bitrate)) as f:
                 for line in f:
@@ -136,10 +136,10 @@ class Environment:
             end_of_video = True
             self.buffer_size = 0
             self.video_chunk_counter = 0
-            
+
             self.trace_idx += 1
             if self.trace_idx >= len(self.all_cooked_time):
-                self.trace_idx = 0            
+                self.trace_idx = 0
 
             self.cooked_time = self.all_cooked_time[self.trace_idx]
             self.cooked_bw = self.all_cooked_bw[self.trace_idx]
@@ -150,7 +150,7 @@ class Environment:
             self.last_mahimahi_time = self.cooked_time[self.mahimahi_ptr - 1]
 
         next_video_chunk_sizes = []
-        for i in xrange(BITRATE_LEVELS):
+        for i in range(BITRATE_LEVELS):
             next_video_chunk_sizes.append(self.video_size[i][self.video_chunk_counter])
 
         return delay, \
