@@ -1,6 +1,8 @@
+import csv
 import logging
 import multiprocessing as mp
 import os
+import time
 
 import a3c
 import env
@@ -33,7 +35,7 @@ SMOOTH_PENALTY = 1
 DEFAULT_QUALITY = 1  # default video quality without agent
 RANDOM_SEED = 42
 RAND_RANGE = 1000
-NOISE = 4
+NOISE = 0
 DURATION = 1
 
 SUMMARY_DIR = f'../results/results_noise{NOISE}'
@@ -45,6 +47,7 @@ TEST_LOG_FOLDER = os.path.join(SUMMARY_DIR, 'test_results')
 # TRAIN_TRACES = './train_sim_traces'
 TRAIN_TRACES = '../data/train'
 VAL_TRACES = '../data/val/'
+TEST_TRACES = '../data/test'
 # NN_MODEL = './results/pretrain_linear_reward.ckpt'
 NN_MODEL = None
 
@@ -173,7 +176,7 @@ def test(test_traces_dir, actor, log_output_dir):
             log_file = open(log_path, 'w')
 
 
-def testing(epoch, actor, log_file):
+def testing(epoch, actor, log_file, trace_dir):
     # clean up the test results folder
     os.system('rm -r ' + TEST_LOG_FOLDER)
     # os.system('mkdir ' + TEST_LOG_FOLDER)
@@ -181,7 +184,7 @@ def testing(epoch, actor, log_file):
 
     # run test script
     # os.system(f'python rl_test.py {nn_model} {TEST_LOG_FOLDER}')
-    test(VAL_TRACES, actor, TEST_LOG_FOLDER)
+    test(trace_dir, actor, TEST_LOG_FOLDER)
 
     # append test performance to the log
     rewards = []
@@ -229,8 +232,18 @@ def central_agent(net_params_queues, exp_queues):
                         filemode='w',
                         level=logging.INFO)
 
-    with tf.Session() as sess, open(os.path.join(SUMMARY_DIR, 'log_test'),
-                                    'w') as test_log_file:
+    with tf.Session() as sess, \
+        open(os.path.join(SUMMARY_DIR, 'log_test'), 'w', 1) as test_log_file, \
+        open(os.path.join(SUMMARY_DIR, 'log_train'), 'w', 1) as log_central_file, \
+        open(os.path.join(SUMMARY_DIR, 'log_val'), 'w', 1) as val_log_file:
+        log_writer = csv.writer(log_central_file, delimiter='\t')
+        log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
+        test_log_file.write("\t".join(
+            ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
+             'rewards_median', 'rewards_95per', 'rewards_max\n']))
+        val_log_file.write("\t".join(
+            ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
+             'rewards_median', 'rewards_95per', 'rewards_max\n']))
 
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[S_INFO, S_LEN], action_dim=A_DIM,
@@ -257,6 +270,7 @@ def central_agent(net_params_queues, exp_queues):
         # assemble experiences from agents, compute the gradients
         max_avg_reward = None
         while True:
+            start_t = time.time()
             # synchronize the network parameters of work agent
             actor_net_params = actor.get_network_params()
             critic_net_params = critic.get_network_params()
@@ -326,6 +340,7 @@ def central_agent(net_params_queues, exp_queues):
                          ' TD_loss: ' + str(avg_td_loss) +
                          ' Avg_reward: ' + str(avg_reward) +
                          ' Avg_entropy: ' + str(avg_entropy))
+            log_writer.writerow([epoch, avg_td_loss, avg_reward, avg_entropy])
 
             summary_str = sess.run(summary_ops, feed_dict={
                 summary_vars[0]: avg_td_loss,
@@ -337,7 +352,8 @@ def central_agent(net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
-                avg_val_reward = testing(epoch, actor, test_log_file)
+                avg_test_reward = testing(epoch, actor, test_log_file, TEST_TRACES)
+                avg_val_reward = testing(epoch, actor, val_log_file, VAL_TRACES)
                 if max_avg_reward is None or (avg_val_reward > max_avg_reward):
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
@@ -352,6 +368,8 @@ def central_agent(net_params_queues, exp_queues):
                         sess,
                         os.path.join(SUMMARY_DIR, f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
+            end_t = time.time()
+            print(f'epoch{epoch-1}: {end_t - start_t}s')
 
 
 def agent(agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_queue):

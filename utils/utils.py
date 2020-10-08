@@ -46,3 +46,19 @@ def adjust_traces(all_ts, all_bw, bw_noise=0, duration_factor=1):
     assert len(new_all_ts) == len(all_ts)
     assert len(new_all_bw) == len(all_bw)
     return new_all_ts, new_all_bw
+
+
+def compute_cdf(data):
+    """ Return the cdf of input data.
+
+    Args
+        data(list): a list of numbers.
+
+    Return
+        sorted_data(list): sorted list of numbers.
+
+    """
+    length = len(data)
+    sorted_data = sorted(data)
+    cdf = [i / length for i, val in enumerate(sorted_data)]
+    return sorted_data, cdf

@@ -27,8 +27,8 @@ SMOOTH_PENALTY = 1
 DEFAULT_QUALITY = 1  # default video quality without agent
 RANDOM_SEED = 42
 RAND_RANGE = 1000000
-SUMMARY_DIR = '../results/tmp'
-TEST_TRACES = '../data/test'
+# SUMMARY_DIR = '../results/tmp'
+# TEST_TRACES = '../data/test'
 # LOG_FILE = './results/log_sim_mpc'
 # log in format of time_stamp bit_rate buffer_size rebuffer_time chunk_size
 # download_time reward

@@ -19,12 +19,12 @@ RANDOM_SEED = 42
 RAND_RANGE = 1000000
 RESEVOIR = 5  # BB
 CUSHION = 10  # BB
-SUMMARY_DIR = '../results/tmp'
+# SUMMARY_DIR = '../results/tmp'
 # LOG_FILE = './results/log_sim_bb'
 # log in format of time_stamp bit_rate buffer_size rebuffer_time chunk_size
 # download_time reward
 
-TEST_TRACES = '../data/test'
+# TEST_TRACES = '../data/test'
 
 def parse_args():
     parser = argparse.ArgumentParser(

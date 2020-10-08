@@ -32,7 +32,7 @@ RAND_RANGE = 1000
 # LOG_FILE = './test_results/log_sim_rl'
 # TEST_TRACES = './cooked_test_traces/'
 # TEST_TRACES = './test_sim_traces/'
-TEST_TRACES = '../data/val/'
+# TEST_TRACES = '../data/val/'
 # log in format of time_stamp bit_rate buffer_size rebuffer_time chunk_size download_time reward
 
 
@@ -161,8 +161,9 @@ def main():
 
             action_prob = actor.predict(np.reshape(state, (1, S_INFO, S_LEN)))
             action_cumsum = np.cumsum(action_prob)
-            bit_rate = (action_cumsum > np.random.randint(
-                1, RAND_RANGE) / float(RAND_RANGE)).argmax()
+            # bit_rate = (action_cumsum > np.random.randint(
+            #     1, RAND_RANGE) / float(RAND_RANGE)).argmax()
+            bit_rate = action_prob.argmax()
             # Note: we need to discretize the probability into 1/RAND_RANGE steps,
             # because there is an intrinsic discrepancy in passing single state and batch states
 
