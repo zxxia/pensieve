@@ -16,7 +16,8 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ['CUDA_VISIBLE_DEVICES'] = "2"
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-# bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and time), chunk_til_video_end
+# bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and
+# time), chunk_til_video_end
 S_INFO = 6
 S_LEN = 8  # take how many frames in the past
 A_DIM = 6
@@ -38,7 +39,9 @@ RAND_RANGE = 1000
 NOISE = 0
 DURATION = 1
 
-SUMMARY_DIR = f'../results/results_noise{NOISE}'
+# SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
+SUMMARY_DIR = f'../results/entropy_weight_exp/results_noise{NOISE}'
+# SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
 # SUMMARY_DIR = './results_noise-1'
@@ -52,11 +55,17 @@ TEST_TRACES = '../data/test'
 NN_MODEL = None
 
 
+def entropy_weight_decay_func(epoch):
+    # linear decay
+    return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
+
+
 def test(test_traces_dir, actor, log_output_dir):
     np.random.seed(RANDOM_SEED)
     assert len(VIDEO_BIT_RATE) == A_DIM
 
-    all_cooked_time, all_cooked_bw, all_file_names = load_traces(test_traces_dir)
+    all_cooked_time, all_cooked_bw, all_file_names = load_traces(
+        test_traces_dir)
     # handle the noise and duration variation here
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
@@ -140,6 +149,8 @@ def test(test_traces_dir, actor, log_output_dir):
         action_cumsum = np.cumsum(action_prob)
         bit_rate = (action_cumsum > np.random.randint(
             1, RAND_RANGE) / float(RAND_RANGE)).argmax()
+        # TODO: Zhengxu: Why compute bitrate this way?
+        # bit_rate = action_prob.argmax()
         # Note: we need to discretize the probability into 1/RAND_RANGE steps,
         # because there is an intrinsic discrepancy in passing single state and batch states
 
@@ -179,11 +190,9 @@ def test(test_traces_dir, actor, log_output_dir):
 def testing(epoch, actor, log_file, trace_dir):
     # clean up the test results folder
     os.system('rm -r ' + TEST_LOG_FOLDER)
-    # os.system('mkdir ' + TEST_LOG_FOLDER)
     os.makedirs(TEST_LOG_FOLDER, exist_ok=True)
 
     # run test script
-    # os.system(f'python rl_test.py {nn_model} {TEST_LOG_FOLDER}')
     test(trace_dir, actor, TEST_LOG_FOLDER)
 
     # append test performance to the log
@@ -233,9 +242,9 @@ def central_agent(net_params_queues, exp_queues):
                         level=logging.INFO)
 
     with tf.Session() as sess, \
-        open(os.path.join(SUMMARY_DIR, 'log_test'), 'w', 1) as test_log_file, \
-        open(os.path.join(SUMMARY_DIR, 'log_train'), 'w', 1) as log_central_file, \
-        open(os.path.join(SUMMARY_DIR, 'log_val'), 'w', 1) as val_log_file:
+            open(os.path.join(SUMMARY_DIR, 'log_test'), 'w', 1) as test_log_file, \
+            open(os.path.join(SUMMARY_DIR, 'log_train'), 'w', 1) as log_central_file, \
+            open(os.path.join(SUMMARY_DIR, 'log_val'), 'w', 1) as val_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
@@ -256,7 +265,8 @@ def central_agent(net_params_queues, exp_queues):
         summary_ops, summary_vars = a3c.build_summaries()
 
         sess.run(tf.global_variables_initializer())
-        writer = tf.summary.FileWriter(SUMMARY_DIR, sess.graph)  # training monitor
+        writer = tf.summary.FileWriter(
+            SUMMARY_DIR, sess.graph)  # training monitor
         saver = tf.train.Saver(max_to_keep=15)  # save neural net parameters
 
         # restore neural net parameters
@@ -296,6 +306,9 @@ def central_agent(net_params_queues, exp_queues):
             actor_gradient_batch = []
             critic_gradient_batch = []
 
+            # linear entropy weight decay(paper sec4.4)
+            entropy_weight = entropy_weight_decay_func(epoch)
+
             for i in range(NUM_AGENTS):
                 s_batch, a_batch, r_batch, terminal, info = exp_queues[i].get()
 
@@ -304,7 +317,8 @@ def central_agent(net_params_queues, exp_queues):
                         s_batch=np.stack(s_batch, axis=0),
                         a_batch=np.vstack(a_batch),
                         r_batch=np.vstack(r_batch),
-                        terminal=terminal, actor=actor, critic=critic)
+                        terminal=terminal, actor=actor, critic=critic,
+                        entropy_weight=entropy_weight)
 
                 actor_gradient_batch.append(actor_gradient)
                 critic_gradient_batch.append(critic_gradient)
@@ -352,18 +366,12 @@ def central_agent(net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
-                avg_test_reward = testing(epoch, actor, test_log_file, TEST_TRACES)
-                avg_val_reward = testing(epoch, actor, val_log_file, VAL_TRACES)
+                _ = testing(epoch, actor, test_log_file, TEST_TRACES)
+                avg_val_reward = testing(
+                    epoch, actor, val_log_file, VAL_TRACES)
                 if max_avg_reward is None or (avg_val_reward > max_avg_reward):
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
-                # save_path = saver.save(
-                #     sess,
-                #     os.path.join(SUMMARY_DIR, f"nn_model_tmp.ckpt"))
-                # logging.info("Model saved in file: " + save_path)
-                # avg_val_reward = testing(epoch,
-                #         os.path.join(SUMMARY_DIR, f"nn_model_tmp.ckpt"),
-                #         test_log_file)
                     save_path = saver.save(
                         sess,
                         os.path.join(SUMMARY_DIR, f"nn_model_ep_{epoch}.ckpt"))

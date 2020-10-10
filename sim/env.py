@@ -59,7 +59,7 @@ class Environment:
 
         while True:  # download video chunk over mahimahi
             throughput = self.cooked_bw[self.mahimahi_ptr] \
-                         * B_IN_MB / BITS_IN_BYTE
+                         * B_IN_MB / BITS_IN_BYTE  # throughput = bytes per ms
             duration = self.cooked_time[self.mahimahi_ptr] \
                        - self.last_mahimahi_time
 
