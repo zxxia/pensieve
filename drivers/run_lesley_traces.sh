@@ -22,7 +22,8 @@ NN_MODELS=( "../results/results_noise0_new/nn_model_ep_20100.ckpt"
              "../results/results_noise3/nn_model_ep_18100.ckpt"
              "../results/results_noise4/nn_model_ep_20500.ckpt" )
 for  DATASET in 3G  LTE  NG_fixed_sim  NG_high_sim  NG_low_sim  NG_middle_sim; do
-    SUMMARY_DIR="../results/lesley_validation/${DATASET}"
+    # SUMMARY_DIR="../results/lesley_validation/${DATASET}"
+    SUMMARY_DIR="../results/tmp"
     # python ${SIMULATOR_DIR}/bb.py \
     #     --test_trace_dir ${TRACE_ROOT}/${DATASET} \
     #     --summary_dir ${SUMMARY_DIR}/bb\
@@ -32,7 +33,7 @@ for  DATASET in 3G  LTE  NG_fixed_sim  NG_high_sim  NG_low_sim  NG_middle_sim; d
         --test_trace_dir ${TRACE_ROOT}/${DATASET} \
         --summary_dir ${SUMMARY_DIR}/mpc\
         --noise ${NOISE} \
-        --duration ${DURATION} &
+        --duration ${DURATION} # &
 
     # for ((i=0;i<${#NN_MODELS[@]};++i)); do
     #     python ${SIMULATOR_DIR}/rl_test.py \
