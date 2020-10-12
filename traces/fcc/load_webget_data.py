@@ -2,7 +2,8 @@ import numpy as np
 import datetime
 
 
-FILE_PATH = './201606/curr_webget_2015_06.csv'
+# FILE_PATH = './201606/curr_webget_2015_06.csv'
+FILE_PATH = './201606/curr_webget_2016_06.csv'
 OUTPUT_PATH = './cooked/'
 NUM_LINES = np.inf
 TIME_ORIGIN = datetime.datetime.utcfromtimestamp(0)
@@ -11,12 +12,12 @@ TIME_ORIGIN = datetime.datetime.utcfromtimestamp(0)
 bw_measurements = {}
 def main():
 	line_counter = 0
-	with open(FILE_PATH, 'rb') as f:
+	with open(FILE_PATH, 'r') as f:
 		for line in f:
 			parse = line.split(',')
 
 			uid = parse[0]
-			dtime = (datetime.datetime.strptime(parse[1],'%Y-%m-%d %H:%M:%S') 
+			dtime = (datetime.datetime.strptime(parse[1],'%Y-%m-%d %H:%M:%S')
 				- TIME_ORIGIN).total_seconds()
 			target = parse[2]
 			address = parse[3]
@@ -37,7 +38,7 @@ def main():
 		out_file = out_file.replace(':', '-')
 		out_file = out_file.replace('/', '-')
 		out_file = OUTPUT_PATH + out_file
-		with open(out_file, 'wb') as f:
+		with open(out_file, 'w') as f:
 			for i in bw_measurements[k]:
 				f.write(str(i) + '\n')
 
