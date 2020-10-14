@@ -39,7 +39,7 @@ NOISE = 0
 DURATION = 1
 
 # SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
-SUMMARY_DIR = f'../results/entropy_weight_exp/results_noise{NOISE}'
+SUMMARY_DIR = '../results/entropy_weight_exp/results_HD_simpleNN_32'
 # SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
@@ -104,10 +104,15 @@ def test(args, test_traces_dir, actor, log_output_dir):
         time_stamp += sleep_time  # in ms
 
         # reward is video quality - rebuffer penalty - smoothness
-        reward = VIDEO_BIT_RATE[bit_rate] / M_IN_K \
-            - REBUF_PENALTY * rebuf \
-            - SMOOTH_PENALTY * np.abs(VIDEO_BIT_RATE[bit_rate] -
-                                      VIDEO_BIT_RATE[last_bit_rate]) / M_IN_K
+        # reward = VIDEO_BIT_RATE[bit_rate] / M_IN_K \
+        #     - REBUF_PENALTY * rebuf \
+        #     - SMOOTH_PENALTY * np.abs(VIDEO_BIT_RATE[bit_rate] -
+        #                               VIDEO_BIT_RATE[last_bit_rate]) / M_IN_K
+
+        # -- HD reward --
+        reward = HD_REWARD[bit_rate] \
+                 - REBUF_PENALTY * rebuf \
+                 - SMOOTH_PENALTY * np.abs( HD_REWARD[bit_rate] - HD_REWARD[last_bit_rate] )
 
         r_batch.append(reward)
 
@@ -470,10 +475,10 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
 
             # -- linear reward --
             # reward is video quality - rebuffer penalty - smoothness
-            reward = VIDEO_BIT_RATE[bit_rate] / M_IN_K \
-                - REBUF_PENALTY * rebuf \
-                - SMOOTH_PENALTY * np.abs(VIDEO_BIT_RATE[bit_rate] -
-                                          VIDEO_BIT_RATE[last_bit_rate]) / M_IN_K
+            # reward = VIDEO_BIT_RATE[bit_rate] / M_IN_K \
+            #     - REBUF_PENALTY * rebuf \
+            #     - SMOOTH_PENALTY * np.abs(VIDEO_BIT_RATE[bit_rate] -
+            #                               VIDEO_BIT_RATE[last_bit_rate]) / M_IN_K
 
             # -- log scale reward --
             # log_bit_rate = np.log(VIDEO_BIT_RATE[bit_rate] / float(VIDEO_BIT_RATE[-1]))
@@ -484,9 +489,9 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
             #          - SMOOTH_PENALTY * np.abs(log_bit_rate - log_last_bit_rate)
 
             # -- HD reward --
-            # reward = HD_REWARD[bit_rate] \
-            #          - REBUF_PENALTY * rebuf \
-            #          - SMOOTH_PENALTY * np.abs(HD_REWARD[bit_rate] - HD_REWARD[last_bit_rate])
+            reward = HD_REWARD[bit_rate] \
+                     - REBUF_PENALTY * rebuf \
+                     - SMOOTH_PENALTY * np.abs(HD_REWARD[bit_rate] - HD_REWARD[last_bit_rate])
 
             r_batch.append(reward)
 
