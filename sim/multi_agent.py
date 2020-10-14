@@ -39,7 +39,7 @@ NOISE = 0
 DURATION = 1
 
 # SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
-SUMMARY_DIR = '../results/entropy_weight_exp/results_HD_simpleNN_32'
+SUMMARY_DIR = '../results/entropy_weight_exp/results_HD_simpleNN_2'
 # SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
 # SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
