@@ -9,7 +9,7 @@ import tensorflow as tf
 
 from utils.utils import adjust_traces, load_traces
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 tf.logging.set_verbosity(tf.logging.INFO)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
