@@ -14,7 +14,7 @@ from utils.utils import adjust_traces, load_traces
 
 tf.logging.set_verbosity(tf.logging.INFO)
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-os.environ['CUDA_VISIBLE_DEVICES'] = "2"
+os.environ['CUDA_VISIBLE_DEVICES'] = ""
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and
@@ -252,7 +252,8 @@ def testing(epoch, actor, log_file, trace_dir, test_log_folder, noise, duration)
 
 
 def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
-                  val_trace_dir, test_trace_dir, noise, duration):
+                  train_trace_dir, val_trace_dir, test_trace_dir, noise,
+                  duration):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
     tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -266,13 +267,17 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
     with tf.Session() as sess, \
             open(os.path.join(summary_dir, 'log_test'), 'w', 1) as test_log_file, \
             open(os.path.join(summary_dir, 'log_train'), 'w', 1) as log_central_file, \
-            open(os.path.join(summary_dir, 'log_val'), 'w', 1) as val_log_file:
+            open(os.path.join(summary_dir, 'log_val'), 'w', 1) as val_log_file, \
+            open(os.path.join(summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
             ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
              'rewards_median', 'rewards_95per', 'rewards_max\n']))
         val_log_file.write("\t".join(
+            ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
+             'rewards_median', 'rewards_95per', 'rewards_max\n']))
+        train_e2e_log_file.write("\t".join(
             ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
              'rewards_median', 'rewards_95per', 'rewards_max\n']))
 
@@ -387,6 +392,9 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
+                _ = testing(epoch, actor, train_e2e_log_file, train_trace_dir,
+                            os.path.join(summary_dir, 'test_results'), noise,
+                            duration)
                 _ = testing(epoch, actor, test_log_file, test_trace_dir,
                             os.path.join(summary_dir, 'test_results'), noise,
                             duration)
@@ -437,6 +445,7 @@ def agent(agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
         entropy_record = []
 
         time_stamp = 0
+        epoch = 0
         while True:  # experience video streaming forever
 
             # the action is from the last decision
@@ -511,11 +520,15 @@ def agent(agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
                            str(rebuf) + '\t' +
                            str(video_chunk_size) + '\t' +
                            str(delay) + '\t' +
-                           str(reward) + '\n')
+                           str(reward) + '\t' +
+                           str(epoch) + '\t' +
+                           str(net_env.trace_idx) + '\t' +
+                           str(net_env.mahimahi_ptr)+'\n')
             log_file.flush()
 
             # report experience to the coordinator
             if len(r_batch) >= TRAIN_SEQ_LEN or end_of_video:
+                epoch += 1
                 exp_queue.put([s_batch[1:],  # ignore the first chuck
                                a_batch[1:],  # since we don't have the
                                r_batch[1:],  # control over it
@@ -576,6 +589,7 @@ def main():
     coordinator = mp.Process(target=central_agent,
                              args=(net_params_queues, exp_queues,
                                    args.summary_dir, args.model_path,
+                                   args.train_trace_dir,
                                    args.val_trace_dir, args.test_trace_dir,
                                    args.noise, args.duration))
     coordinator.start()
