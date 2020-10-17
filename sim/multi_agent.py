@@ -38,13 +38,12 @@ DEFAULT_QUALITY = 1  # default video quality without agent
 NOISE = 0
 DURATION = 1
 
-# SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
-SUMMARY_DIR = f'../results/entropy_weight_exp/results_noise{NOISE}'
-# SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
-# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
-# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
-# SUMMARY_DIR = './results_noise-1'
-TEST_LOG_FOLDER = os.path.join(SUMMARY_DIR, 'test_results')
+#   args.summary_dir = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
+# args.summary_dir = f'../results/entropy_weight_exp/results_noise{NOISE}'
+#   args.summary_dir = f'../results/lr_exp/results_noise{NOISE}'
+#   args.summary_dir = '../results/results_duration_quarter'  # .format(DURATION)
+#   args.summary_dir = '../results/results_duration_quarter'  # .format(DURATION)
+#   args.summary_dir = './results_noise-1'
 # TRAIN_TRACES = './cooked_traces/'  # original trace location
 # TRAIN_TRACES = './train_sim_traces'
 TRAIN_TRACES = '../data/train'
@@ -68,7 +67,7 @@ def test(args, test_traces_dir, actor, log_output_dir):
     # handle the noise and duration variation here
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
-        bw_noise=NOISE, duration_factor=DURATION)
+        bw_noise=args.NOISE, duration_factor=DURATION)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw)
@@ -187,6 +186,8 @@ def test(args, test_traces_dir, actor, log_output_dir):
 
 
 def testing(epoch, actor, log_file, trace_dir):
+    TEST_LOG_FOLDER = os.path.join( args.summary_dir, 'test_results' )
+
     # clean up the test results folder
     os.system('rm -r ' + TEST_LOG_FOLDER)
     os.makedirs(TEST_LOG_FOLDER, exist_ok=True)
@@ -243,14 +244,14 @@ def central_agent(args, net_params_queues, exp_queues):
     assert len(net_params_queues) == args.NUM_AGENTS
     assert len(exp_queues) == args.NUM_AGENTS
 
-    logging.basicConfig(filename=os.path.join(SUMMARY_DIR,  'log_central'),
+    logging.basicConfig(filename=os.path.join(  args.summary_dir,  'log_central'),
                         filemode='w',
                         level=logging.INFO)
 
     with tf.Session() as sess, \
-            open(os.path.join(SUMMARY_DIR, 'log_test'), 'w', 1) as test_log_file, \
-            open(os.path.join(SUMMARY_DIR, 'log_train'), 'w', 1) as log_central_file, \
-            open(os.path.join(SUMMARY_DIR, 'log_val'), 'w', 1) as val_log_file:
+            open(os.path.join(  args.summary_dir, 'log_test'), 'w', 1) as test_log_file, \
+            open(os.path.join(  args.summary_dir, 'log_train'), 'w', 1) as log_central_file, \
+            open(os.path.join(  args.summary_dir, 'log_val'), 'w', 1) as val_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
@@ -272,7 +273,7 @@ def central_agent(args, net_params_queues, exp_queues):
 
         sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter(
-            SUMMARY_DIR, sess.graph)  # training monitor
+              args.summary_dir, sess.graph)  # training monitor
         saver = tf.train.Saver(max_to_keep=15)  # save neural net parameters
 
         # restore neural net parameters
@@ -285,7 +286,7 @@ def central_agent(args, net_params_queues, exp_queues):
 
         # assemble experiences from agents, compute the gradients
         max_avg_reward = None
-        while True:
+        while epoch < args.TOTAL_EPOCH:
             start_t = time.time()
             # synchronize the network parameters of work agent
             actor_net_params = actor.get_network_params()
@@ -416,7 +417,7 @@ def central_agent(args, net_params_queues, exp_queues):
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
                         sess,
-                        os.path.join(SUMMARY_DIR, f"nn_model_ep_{epoch}.ckpt"))
+                        os.path.join(  args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
@@ -431,7 +432,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
                               random_seed=agent_id)
 
     with tf.Session() as sess, open(os.path.join(
-            SUMMARY_DIR, f'log_agent_{agent_id}'), 'w') as log_file:
+              args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[args.S_INFO, args.S_LEN], action_dim=args.A_DIM,
                                  learning_rate=args.ACTOR_LR_RATE)
@@ -455,8 +456,9 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
         r_batch = []
         entropy_record = []
 
+        epoch = 0
         time_stamp = 0
-        while True:  # experience video streaming forever
+        while epoch < args.TOTAL_EPOCH:  # experience video streaming forever
 
             # the action is from the last decision
             # this is to make the framework similar to the real
@@ -565,6 +567,8 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
                 s_batch.append(np.zeros((args.S_INFO, args.S_LEN)))
                 a_batch.append(action_vec)
 
+                epoch+=1
+
             else:
                 s_batch.append(state)
 
@@ -583,10 +587,10 @@ def main(args):
     assert len(VIDEO_BIT_RATE) == args.A_DIM
 
     # create result directory
-    if not os.path.exists(SUMMARY_DIR):
-        os.makedirs(SUMMARY_DIR)
+    if not os.path.exists(  args.summary_dir):
+        os.makedirs(  args.summary_dir)
 
-    args.results_dir = SUMMARY_DIR
+    args.results_dir =   args.summary_dir
     config.log_config(args)
 
     # inter-process communication queues
@@ -607,7 +611,7 @@ def main(args):
     all_cooked_time, all_cooked_bw, _ = load_traces(TRAIN_TRACES)
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
-        bw_noise=NOISE, duration_factor=DURATION)
+        bw_noise=args.NOISE, duration_factor=DURATION)
     agents = []
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,

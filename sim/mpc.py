@@ -70,7 +70,7 @@ def parse_args():
                         required=True, help='dir to all test traces.')
     parser.add_argument("--summary_dir", type=str,
                         required=True, help='output path.')
-    parser.add_argument("--noise", type=float, default=0,)
+    parser.add_argument("--random_seed", type=int, default=11)
     parser.add_argument("--duration", type=float, default=1.0)
 
     return parser.parse_args()
@@ -86,8 +86,10 @@ def main():
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         args.test_trace_dir)
     all_cooked_time, all_cooked_bw = adjust_traces(
-        all_cooked_time, all_cooked_bw, bw_noise=args.noise,
-        duration_factor=args.duration)
+        all_cooked_time,
+        all_cooked_bw,
+        args.test_trace_dir,
+        args.random_seed)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw, fixed=True)

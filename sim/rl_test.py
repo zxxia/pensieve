@@ -26,7 +26,7 @@ M_IN_K = 1000.0
 REBUF_PENALTY = 4.3  # 1 sec rebuffering -> 3 Mbps
 SMOOTH_PENALTY = 1
 DEFAULT_QUALITY = 1  # default video quality without agent
-RANDOM_SEED = 42
+#RANDOM_SEED = 42
 RAND_RANGE = 1000
 # LOG_FILE = './test_results/log_sim_rl'
 # TEST_TRACES = './cooked_test_traces/'
@@ -44,7 +44,7 @@ def parse_args():
                         required=True, help='output path.')
     parser.add_argument("--model_path", type=str, required=True,
                         help='model path')
-    parser.add_argument("--noise", type=float, default=0,)
+    parser.add_argument("--random_seed", type=int, default=11)
     parser.add_argument("--duration", type=float, default=1.0)
 
     return parser.parse_args()
@@ -56,8 +56,7 @@ def main():
     nn_model = args.model_path
     test_trace_dir = args.test_trace_dir
     os.makedirs(summary_dir, exist_ok=True)
-
-    np.random.seed(RANDOM_SEED)
+    #np.random.seed(args.random_seed)
 
     assert len(VIDEO_BIT_RATE) == A_DIM
 
@@ -65,8 +64,11 @@ def main():
         test_trace_dir)
     print(len(all_cooked_time[-1]))
     all_cooked_time, all_cooked_bw = adjust_traces(
-        all_cooked_time, all_cooked_bw, bw_noise=args.noise,
-        duration_factor=args.duration)
+        all_cooked_time,
+        all_cooked_bw,
+        test_trace_dir,
+        args.random_seed)
+
     print(len(all_cooked_time[-1]))
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,

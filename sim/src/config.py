@@ -33,6 +33,12 @@ def parse_args():
 
     parser.add_argument('--BUFFER_NORM_FACTOR', type=float, default='10.0', help='')
 
+    parser.add_argument('--NOISE', type=float, default='0', help='')
+
+    parser.add_argument( "--summary_dir", type=str,
+                         required=True, help='output path.' )
+
+
     return parser.parse_args()
 
 

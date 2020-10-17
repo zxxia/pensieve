@@ -4,18 +4,34 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from utils.utils import compute_cdf
+# from utils.utils import compute_cdf
 
 # ROOT = '../results/noise_exp'
-ROOT = '../results/bug_fix'
+ROOT = '../results/robust_test_exp'
 
-NOISES = [0, 1, 2, 3,]
+NOISES = [0, 0.01, 0.02, 0.03]
 
 NAMES = ['timestamp', 'bit rate', 'buffer size',
          'rebuf', 'video chunk size', 'delay', 'reward']
 
 ls_list = ['-', '--', ':']
-SCHEMES = ['bb', 'mpc', 'sim_rl_pretrain', 'sim_rl_train_noise0', 'sim_rl_train_noise1', 'sim_rl_train_noise2', 'sim_rl_train_noise3', ]
+SCHEMES = ['sim_bb', 'sim_mpc', 'sim_rl_pretrain', 'sim_rl_train_noise001', 'sim_rl_train_noise002', 'sim_rl_train_noise003']
+
+
+def compute_cdf(data):
+    """ Return the cdf of input data.
+
+    Args
+        data(list): a list of numbers.
+
+    Return
+        sorted_data(list): sorted list of numbers.
+
+    """
+    length = len(data)
+    sorted_data = sorted(data)
+    cdf = [i / length for i, val in enumerate(sorted_data)]
+    return sorted_data, cdf
 
 
 fig, axes = plt.subplots(2, 3, figsize=(12, 8))
@@ -31,6 +47,7 @@ for noise, ax in zip(NOISES, axes.flatten()):
 
     for i, scheme in enumerate(SCHEMES):
         sorted_reward, cdf = compute_cdf(rewards[scheme])
+        print(sorted_reward)
         ax.plot(sorted_reward, cdf, label=scheme)
     ax.set_title(f"Test on +{noise} in throughput")
     ax.set_ylabel('CDF')
@@ -51,10 +68,12 @@ for plot_idx, (noise, ax) in enumerate(zip(NOISES, axes.flatten())):
             rewards[scheme].append(np.sum(log['reward'][1:]))
 
     mean_rewards = [np.mean(rewards[scheme]) for scheme in SCHEMES]
+    print(mean_rewards)
     mean_rewards_err = [np.std(rewards[scheme])/np.sqrt(len(rewards[scheme])) for scheme in SCHEMES]
     bars = ax.bar(np.arange(len(SCHEMES)), mean_rewards)
     for bar in bars:
         height = bar.get_height()
+        print(height)
         ax.annotate('{}'.format(round(height)),
                     xy=(bar.get_x() + bar.get_width() / 2, height),
                     xytext=(0, 3),  # 3 points vertical offset
@@ -76,7 +95,6 @@ for plot_idx, (noise, ax) in enumerate(zip(NOISES, axes.flatten())):
 fig.tight_layout()
 
 
-SCHEMES = ['bb', 'mpc', 'sim_rl_pretrain',  ]
 fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 for plot_idx, (noise, ax) in enumerate(zip(NOISES, axes.flatten())):
     rewards = {}
