@@ -8,7 +8,7 @@ import env
 import matplotlib.pyplot as plt
 import numpy as np
 
-from utils.utils import adjust_traces, load_traces
+from utils.utils import adjust_traces, load_traces, adjust_traces_one_random
 
 S_INFO = 5  # bit_rate, buffer_size, rebuffering_time, bandwidth_measurement, chunk_til_video_end
 S_LEN = 8  # take how many frames in the past
@@ -72,6 +72,9 @@ def parse_args():
                         required=True, help='output path.')
     parser.add_argument("--random_seed", type=int, default=11)
     parser.add_argument("--duration", type=float, default=1.0)
+    parser.add_argument( '--ROBUST_NOISE', type=float, default='0.1', help='' )
+
+    parser.add_argument( '--SAMPLE_LENGTH', type=int, default='4', help='' )
 
     return parser.parse_args()
 
@@ -85,11 +88,13 @@ def main():
 
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         args.test_trace_dir)
-    all_cooked_time, all_cooked_bw = adjust_traces(
+
+    all_cooked_time, all_cooked_bw = adjust_traces_one_random(
         all_cooked_time,
         all_cooked_bw,
-        args.test_trace_dir,
-        args.random_seed)
+        args.random_seed,
+        args.ROBUST_NOISE,
+        args.SAMPLE_LENGTH)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw, fixed=True)

@@ -1,6 +1,6 @@
 import argparse
 import os
-from utils.utils import adjust_traces, load_traces
+from utils.utils import adjust_traces, load_traces, adjust_traces_one_random
 import a3c
 # import fixed_env as env
 import env
@@ -46,6 +46,9 @@ def parse_args():
                         help='model path')
     parser.add_argument("--random_seed", type=int, default=11)
     parser.add_argument("--duration", type=float, default=1.0)
+    parser.add_argument( '--ROBUST_NOISE', type=float, default='0.1', help='' )
+
+    parser.add_argument( '--SAMPLE_LENGTH', type=int, default='4', help='' )
 
     return parser.parse_args()
 
@@ -63,11 +66,20 @@ def main():
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_trace_dir)
     print(len(all_cooked_time[-1]))
-    all_cooked_time, all_cooked_bw = adjust_traces(
+    # all_cooked_time, all_cooked_bw = adjust_traces(
+    #     all_cooked_time,
+    #     all_cooked_bw,
+    #     test_trace_dir,
+    #     args.random_seed)
+
+    # adjust_traces_one_random(all_ts, all_bw, random_seed, sample_length = 4):
+    all_cooked_time, all_cooked_bw = adjust_traces_one_random(
         all_cooked_time,
         all_cooked_bw,
-        test_trace_dir,
-        args.random_seed)
+        args.random_seed,
+        args.ROBUST_NOISE,
+        args.SAMPLE_LENGTH)
+
 
     print(len(all_cooked_time[-1]))
 

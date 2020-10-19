@@ -1,6 +1,7 @@
 import math
 import os
 import numpy as np
+import random
 import env
 
 
@@ -29,12 +30,14 @@ def load_traces(trace_dir):
 
     return all_ts, all_bw, all_file_names
 
-
 def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=1):
     new_all_bw = []
     new_all_ts = []
     np.random.seed(random_seed)
+    #### add noise to a segment of noise
 
+
+    #### add noise to each BW
     for trace_ts, trace_bw in zip(all_ts, all_bw):
         duration = trace_ts[-1]
         new_duration = duration_factor * duration
@@ -74,6 +77,28 @@ def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=
     # for index in range( len( new_all_ts ) ):
     #     log_file.write( str( new_all_ts[index] ) + '\t' + str(new_all_bw[index] ) + "\n" )
     # log_file.close()
+
+    return new_all_ts, new_all_bw
+
+
+def adjust_traces_one_random(all_ts, all_bw, random_seed, robust_noise, sample_length):
+    new_all_bw = all_bw.copy()
+    new_all_ts = all_ts.copy()
+    np.random.seed(random_seed)
+
+    number_of_traces = len(all_ts)
+    random_trace_index = random.randint(0, number_of_traces - 1)
+    trace_bw = new_all_bw[random_trace_index]
+
+    ########
+    # use your randomization code from the notebook on new_all_bw
+    ########
+    start_index = random.randint( 0, len( trace_bw ) - sample_length )
+    sublist = trace_bw[start_index: start_index + sample_length]
+    trace_bw[start_index:start_index + sample_length] = [i + robust_noise for i in sublist]
+
+    assert len(new_all_ts) == len(all_ts)
+    assert len(new_all_bw) == len(all_bw)
 
     return new_all_ts, new_all_bw
 

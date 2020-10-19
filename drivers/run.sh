@@ -22,27 +22,31 @@ SIMULATOR_DIR="../sim"
 NN_MODELS="../results/robust_exp/noise_3/nn_model_ep_36800.ckpt" #noise=0.03
 #RANDOM_SEED=41
 
+for NOISE in 0.1 0.2 0.3 0.4 0.5; do
 
-for RANDOM_SEED in 11 12 13 14 15 16 17 18 19 20; do
-#    DURATION=1
-SUMMARY_DIR="../results/robust_test_unbound_add/seed_${RANDOM_SEED}"
-#     SUMMARY_DIR="../results/noise_${NOISE}"
-#     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
+    for RANDOM_SEED in 11 12 13 14 15 16 17 18 19 20; do
+      #    DURATION=1
+      SUMMARY_DIR="../results/robust_add_${NOISE}/seed_${RANDOM_SEED}"
+      #     SUMMARY_DIR="../results/noise_${NOISE}"
+      #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
-     python ${SIMULATOR_DIR}/mpc.py \
-         --test_trace_dir ${TRACE_PATH} \
-         --summary_dir ${SUMMARY_DIR}\
-         --random_seed ${RANDOM_SEED}  \
-         --duration ${DURATION} &
+           python ${SIMULATOR_DIR}/mpc.py \
+               --test_trace_dir ${TRACE_PATH} \
+               --summary_dir ${SUMMARY_DIR}\
+               --random_seed ${RANDOM_SEED}  \
+               --ROBUST_NOISE ${NOISE} \
+               --SAMPLE_LENGTH=5 \
+               --duration ${DURATION} &
 
-#     for ((i=0;i<${#NN_MODELS[@]};++i)); do
-      python ${SIMULATOR_DIR}/rl_test.py \
-             --test_trace_dir ${TRACE_PATH} \
-             --summary_dir ${SUMMARY_DIR}\
-             --model_path ${NN_MODELS[i]} \
-             --random_seed ${RANDOM_SEED} \
-             --duration ${DURATION} &
-     done
+      #     for ((i=0;i<${#NN_MODELS[@]};++i)); do
+            python ${SIMULATOR_DIR}/rl_test.py \
+                   --test_trace_dir ${TRACE_PATH} \
+                   --summary_dir ${SUMMARY_DIR}\
+                   --model_path ${NN_MODELS[i]} \
+                   --random_seed ${RANDOM_SEED} \
+                   --ROBUST_NOISE ${NOISE} \
+                   --SAMPLE_LENGTH=5 \
+                   --duration ${DURATION} &
+           done
+done
 
-
-# done
