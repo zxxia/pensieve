@@ -60,7 +60,7 @@ def entropy_weight_decay_func(epoch):
     return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
 
 
-def test(test_traces_dir, actor, log_output_dir, noise, duration):
+def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
     np.random.seed(args.RANDOM_SEED)
     assert len(VIDEO_BIT_RATE) == args.A_DIM
 
@@ -189,13 +189,13 @@ def test(test_traces_dir, actor, log_output_dir, noise, duration):
             log_file = open(log_path, 'w')
 
 
-def testing(epoch, actor, log_file, trace_dir, test_log_folder, noise, duration):
+def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise, duration):
     # clean up the test results folder
     os.system('rm -r ' + test_log_folder)
     os.makedirs(test_log_folder, exist_ok=True)
 
     # run test script
-    test(trace_dir, actor, test_log_folder, noise, duration)
+    test(args, trace_dir, actor, test_log_folder, noise, duration)
 
     # append test performance to the log
     rewards = []
@@ -232,9 +232,8 @@ def testing(epoch, actor, log_file, trace_dir, test_log_folder, noise, duration)
     return rewards_mean
 
 
-def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
-                  train_trace_dir, val_trace_dir, test_trace_dir, noise,
-                  duration):
+# , train_trace_dir, val_trace_dir, test_trace_dir, noise, duration):
+def central_agent(args, net_params_queues, exp_queues):
     # Visdom Logs
     testing_epochs = []
     training_losses = []
@@ -248,15 +247,14 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
     assert len(net_params_queues) == args.NUM_AGENTS
     assert len(exp_queues) == args.NUM_AGENTS
 
-    logging.basicConfig(filename=os.path.join(summary_dir,  'log_central'),
-                        filemode='w',
-                        level=logging.INFO)
+    logging.basicConfig(filename=os.path.join(args.summary_dir, 'log_central'),
+                        filemode='w', level=logging.INFO)
 
     with tf.Session() as sess, \
-            open(os.path.join(summary_dir, 'log_test'), 'w', 1) as test_log_file, \
-            open(os.path.join(summary_dir, 'log_train'), 'w', 1) as log_central_file, \
-            open(os.path.join(summary_dir, 'log_val'), 'w', 1) as val_log_file, \
-            open(os.path.join(summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
+            open(os.path.join(args.summary_dir, 'log_test'), 'w', 1) as test_log_file, \
+            open(os.path.join(args.summary_dir, 'log_train'), 'w', 1) as log_central_file, \
+            open(os.path.join(args.summary_dir, 'log_val'), 'w', 1) as val_log_file, \
+            open(os.path.join(args.summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
@@ -282,12 +280,12 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
 
         sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter(
-            summary_dir, sess.graph)  # training monitor
+            args.summary_dir, sess.graph)  # training monitor
         saver = tf.train.Saver(max_to_keep=15)  # save neural net parameters
 
         # restore neural net parameters
-        if nn_model is not None:  # nn_model is the path to file
-            saver.restore(sess, nn_model)
+        if args.nn_model is not None:  # nn_model is the path to file
+            saver.restore(sess, args.nn_model)
             print("Model restored.")
 
         epoch = 0
@@ -381,16 +379,19 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
-                _ = testing(epoch, actor, train_e2e_log_file, train_trace_dir,
-                            os.path.join(summary_dir, 'test_results'), noise,
-                            duration)
-                _ = testing(epoch, actor, test_log_file, test_trace_dir,
-                            os.path.join(summary_dir, 'test_results'), noise,
-                            duration)
+                _ = testing(args, epoch, actor, train_e2e_log_file,
+                            args.train_trace_dir,
+                            os.path.join(args.summary_dir, 'test_results'),
+                            args.noise, args.duration)
+                _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
+                            os.path.join(args.summary_dir, 'test_results'),
+                            args.noise, args.duration)
 
                 # Visdom log and plot
                 test_mean_reward = testing(
-                    epoch, actor, test_log_file, TEST_TRACES)
+                    args, epoch, actor, val_log_file, args.val_trace_dir,
+                    os.path.join(args.summary_dir, 'test_results'),
+                    args.noise, args.duration)
                 testing_epochs.append(epoch)
                 testing_mean_rewards.append(test_mean_reward)
                 average_rewards.append(np.sum(avg_reward))
@@ -428,29 +429,30 @@ def central_agent(net_params_queues, exp_queues, summary_dir, nn_model,
                     {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_entropy_' + args.start_time})
 
                 avg_val_reward = testing(
-                    epoch, actor, val_log_file, val_trace_dir,
-                    os.path.join(summary_dir, 'test_results'), noise, duration)
+                    args, epoch, actor, val_log_file, args.val_trace_dir,
+                    os.path.join(args.summary_dir, 'test_results'),
+                    args.noise, args.duration)
                 if max_avg_reward is None or (avg_val_reward > max_avg_reward):
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
                         sess,
-                        os.path.join(summary_dir, f"nn_model_ep_{epoch}.ckpt"))
+                        os.path.join(args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
             print(f'epoch{epoch-1}: {end_t - start_t}s')
 
 
-def agent(agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
-          exp_queue, summary_dir):
+def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
+          exp_queue):
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
                               random_seed=agent_id)
 
     with tf.Session() as sess, open(os.path.join(
-            summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
+            args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[args.S_INFO,
                                             args.S_LEN], action_dim=args.A_DIM,
@@ -612,7 +614,6 @@ def main(args):
     if not os.path.exists(args.summary_dir):
         os.makedirs(args.summary_dir)
 
-    args.results_dir = SUMMARY_DIR
     config.log_config(args)
 
     # inter-process communication queues
@@ -625,11 +626,7 @@ def main(args):
     # create a coordinator and multiple agent processes
     # (note: threading is not desirable due to python GIL)
     coordinator = mp.Process(target=central_agent,
-                             args=(net_params_queues, exp_queues,
-                                   args.summary_dir, args.model_path,
-                                   args.train_trace_dir,
-                                   args.val_trace_dir, args.test_trace_dir,
-                                   args.noise, args.duration))
+                             args=(args, net_params_queues, exp_queues))
     coordinator.start()
 
     all_cooked_time, all_cooked_bw, _ = load_traces(args.train_trace_dir)
@@ -640,8 +637,7 @@ def main(args):
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,
                                  args=(args, i, all_cooked_time, all_cooked_bw,
-                                       net_params_queues[i],
-                                       exp_queues[i], args.summary_dir)))
+                                       net_params_queues[i], exp_queues[i])))
     for i in range(args.NUM_AGENTS):
         agents[i].start()
 

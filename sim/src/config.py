@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 
 def parse_args():
@@ -49,7 +50,7 @@ def parse_args():
                         required=True, help='dir to all test traces.')
     parser.add_argument("--summary_dir", type=str,
                         required=True, help='output path.')
-    parser.add_argument("--model_path", type=str, default=None,
+    parser.add_argument("--nn_model", type=str, default=None,
                         help='model path')
     parser.add_argument("--noise", type=float, default=0,)
     parser.add_argument("--duration", type=float, default=1.0)
@@ -61,7 +62,7 @@ def log_config(args):
     """
     Writes arguments to log. Assumes args.results_dir exists.
     """
-    log_file = args.results_dir + '.config'
+    log_file = os.path.join(args.summary_dir, '.config')
     config_logging = logging.getLogger("config")
     formatter = logging.Formatter('%(asctime)s : %(message)s')
     file_handler = logging.FileHandler(log_file, mode='w')
