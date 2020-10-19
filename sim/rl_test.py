@@ -1,13 +1,12 @@
 import argparse
 import os
-
+from utils.utils import adjust_traces, load_traces
 import a3c
 # import fixed_env as env
 import env
 import numpy as np
 import tensorflow as tf
 
-from utils.utils import adjust_traces, load_traces
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
