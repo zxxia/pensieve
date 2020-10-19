@@ -33,7 +33,7 @@ LOG_FILES=( '0' '1' '2' '3' )
 
 for NOISE in 0 ; do
     # SUMMARY_DIR="../results/noise_exp/noise_${NOISE}"
-    SUMMARY_DIR="../results/tmp/noise_${NOISE}"
+    # SUMMARY_DIR="../results/tmp/noise_${NOISE}"
     # SUMMARY_DIR="../results/exponential_traces/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period20/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period40_changing_peak/results_noise_${NOISE}_duration_${DURATION}"
@@ -41,6 +41,7 @@ for NOISE in 0 ; do
     # SUMMARY_DIR="../results/constant_trace/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/eval_train_e2e/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/eval_train_e2e_new/results_noise_${NOISE}_duration_${DURATION}"
+    SUMMARY_DIR="../results/remove_bad_traces/noise_${NOISE}"
     python ${SIMULATOR_DIR}/multi_agent.py \
         --train_trace_dir ${TRAIN_TRACE_PATH} \
         --val_trace_dir ${VAL_TRACE_PATH} \
