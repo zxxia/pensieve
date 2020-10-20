@@ -80,22 +80,53 @@ def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=
 
     return new_all_ts, new_all_bw
 
-
 def adjust_traces_one_random(all_ts, all_bw, random_seed, robust_noise, sample_length):
+    adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_length, number_pick=1)
+    # new_all_bw = all_bw.copy()
+    # new_all_ts = all_ts.copy()
+    # np.random.seed(random_seed)
+    #
+    # number_of_traces = len(all_ts)
+    # random_trace_index = random.randint(0, number_of_traces - 1)
+    # trace_bw = new_all_bw[random_trace_index]
+    #
+    # ########
+    # # use your randomization code from the notebook on new_all_bw
+    # ########
+    # start_index = random.randint( 0, len( trace_bw ) - sample_length )
+    # sublist = trace_bw[start_index: start_index + sample_length]
+    # trace_bw[start_index:start_index + sample_length] = [i * float(1+robust_noise) for i in sublist]
+    #
+    # assert len(new_all_ts) == len(all_ts)
+    # assert len(new_all_bw) == len(all_bw)
+    #
+    # return new_all_ts, new_all_bw
+
+
+def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_length, number_pick):
     new_all_bw = all_bw.copy()
     new_all_ts = all_ts.copy()
     np.random.seed(random_seed)
 
     number_of_traces = len(all_ts)
-    random_trace_index = random.randint(0, number_of_traces - 1)
-    trace_bw = new_all_bw[random_trace_index]
 
-    ########
-    # use your randomization code from the notebook on new_all_bw
-    ########
-    start_index = random.randint( 0, len( trace_bw ) - sample_length )
-    sublist = trace_bw[start_index: start_index + sample_length]
-    trace_bw[start_index:start_index + sample_length] = [i * float(1+robust_noise) for i in sublist]
+    # we need n random index numbers from the set
+    # do this n times
+    random_trace_indices = random.sample(range(0, number_of_traces - 1), number_pick)
+
+    for ri in random_trace_indices:
+        trace_bw = new_all_bw[ri]
+
+        start_index = random.randint( 0, len( trace_bw ) - sample_length )
+        sublist = trace_bw[start_index: start_index + sample_length]
+        new_sublist = []
+        for i in sublist:
+            if i + robust_noise > 0:
+                i = i + robust_noise
+            else:
+                i = i
+            new_sublist.append(i)
+        trace_bw[start_index:start_index + sample_length] = new_sublist
 
     assert len(new_all_ts) == len(all_ts)
     assert len(new_all_bw) == len(all_bw)

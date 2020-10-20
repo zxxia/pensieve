@@ -23,18 +23,18 @@ NN_MODELS="../results/robust_exp/noise_3/nn_model_ep_36800.ckpt" #noise=0.03
 #RANDOM_SEED=41
 
 
-    for RANDOM_SEED in 11 12 13 14 15 16 17 18 19 20; do
-      SUMMARY_DIR="../results/robust_mul_0.05_length5/seed_${RANDOM_SEED}"
+    for RANDOM_SEED in {1..200}; do
+      SUMMARY_DIR="../results/robust_Pensieve_add_-0.1_length10_pick25_200seeds/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
-           python ${SIMULATOR_DIR}/mpc.py \
-               --test_trace_dir ${TRACE_PATH} \
-               --summary_dir ${SUMMARY_DIR}\
-               --random_seed ${RANDOM_SEED}  \
-               --ROBUST_NOISE=0.05 \
-               --SAMPLE_LENGTH=5 \
-               --duration ${DURATION} &
+#           python ${SIMULATOR_DIR}/mpc.py \
+#               --test_trace_dir ${TRACE_PATH} \
+#               --summary_dir ${SUMMARY_DIR}\
+#               --random_seed ${RANDOM_SEED}  \
+#               --ROBUST_NOISE=0.05 \
+#               --SAMPLE_LENGTH=5 \
+#               --duration ${DURATION} &
 
       #     for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
@@ -42,8 +42,9 @@ NN_MODELS="../results/robust_exp/noise_3/nn_model_ep_36800.ckpt" #noise=0.03
                    --summary_dir ${SUMMARY_DIR}\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
-                   --ROBUST_NOISE=0.05 \
-                   --SAMPLE_LENGTH=5 \
+                   --ROBUST_NOISE=-0.2 \
+                   --SAMPLE_LENGTH=10 \
+                   --NUMBER_PICK=25 \
                    --duration ${DURATION} &
            done
 

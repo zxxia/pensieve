@@ -1,6 +1,6 @@
 import argparse
 import os
-from utils.utils import adjust_traces, load_traces, adjust_traces_one_random
+from utils.utils import adjust_n_random_traces, load_traces, adjust_traces_one_random
 import a3c
 # import fixed_env as env
 import env
@@ -49,6 +49,8 @@ def parse_args():
     parser.add_argument( '--ROBUST_NOISE', type=float, default='0.1', help='' )
 
     parser.add_argument( '--SAMPLE_LENGTH', type=int, default='4', help='' )
+    parser.add_argument( '--NUMBER_PICK', type=int, default='1', help='' )
+
 
     return parser.parse_args()
 
@@ -73,12 +75,13 @@ def main():
     #     args.random_seed)
 
     # adjust_traces_one_random(all_ts, all_bw, random_seed, sample_length = 4):
-    all_cooked_time, all_cooked_bw = adjust_traces_one_random(
+    all_cooked_time, all_cooked_bw = adjust_n_random_traces(
         all_cooked_time,
         all_cooked_bw,
         args.random_seed,
         args.ROBUST_NOISE,
-        args.SAMPLE_LENGTH)
+        args.SAMPLE_LENGTH,
+        args.NUMBER_PICK)
 
 
     print(len(all_cooked_time[-1]))
