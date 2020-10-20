@@ -19,7 +19,7 @@ SIMULATOR_DIR="../sim"
 #LOG_FILES=( '0' '1' '2' '3')
 
 
-NN_MODELS="../results/robust_exp/noise_3/nn_model_ep_36800.ckpt" #noise=0.03
+NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
 #RANDOM_SEED=41
 
 
@@ -42,7 +42,7 @@ NN_MODELS="../results/robust_exp/noise_3/nn_model_ep_36800.ckpt" #noise=0.03
                    --summary_dir ${SUMMARY_DIR}\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
-                   --ROBUST_NOISE=-0.2 \
+                   --ROBUST_NOISE=-0.1 \
                    --SAMPLE_LENGTH=10 \
                    --NUMBER_PICK=25 \
                    --duration ${DURATION} &
