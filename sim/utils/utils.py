@@ -95,7 +95,7 @@ def adjust_traces_one_random(all_ts, all_bw, random_seed, robust_noise, sample_l
     ########
     start_index = random.randint( 0, len( trace_bw ) - sample_length )
     sublist = trace_bw[start_index: start_index + sample_length]
-    trace_bw[start_index:start_index + sample_length] = [i + robust_noise for i in sublist]
+    trace_bw[start_index:start_index + sample_length] = [i * float(1+robust_noise) for i in sublist]
 
     assert len(new_all_ts) == len(all_ts)
     assert len(new_all_bw) == len(all_bw)
