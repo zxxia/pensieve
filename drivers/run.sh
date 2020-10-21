@@ -20,14 +20,15 @@ SIMULATOR_DIR="../sim"
 
 
 NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
+
+SUMMARY_DIR="../results/robust_BBA_Pensieve_add_-0.1_length3_pick54/seed_${RANDOM_SEED}"
+
 #RANDOM_SEED=41
 
 
     for RANDOM_SEED in {1..100}; do
-      SUMMARY_DIR="../results/robust_BBA_Pensieve_add_-0.1_length3_pick54/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
-
         #for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
                    --test_trace_dir ${TRACE_PATH} \
@@ -39,15 +40,18 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
                    --NUMBER_PICK=53 \
                    --duration ${DURATION} &
 
-           python ${SIMULATOR_DIR}/bb.py \
-               --test_trace_dir ${TRACE_PATH} \
-               --summary_dir ${SUMMARY_DIR}\
-               --random_seed ${RANDOM_SEED}  \
-               --ROBUST_NOISE=-0.1 \
-               --SAMPLE_LENGTH=3 \
-               --NUMBER_PICK=53 \
-               --duration ${DURATION} &
-
 
     done
 
+
+    for RANDOM_SEED in {1..100}; do
+            python ${SIMULATOR_DIR}/bb.py \
+                   --test_trace_dir ${TRACE_PATH} \
+                   --summary_dir ${SUMMARY_DIR}\
+                   --random_seed ${RANDOM_SEED}  \
+                   --ROBUST_NOISE=-0.1 \
+                   --SAMPLE_LENGTH=3 \
+                   --NUMBER_PICK=53 \
+                   --duration ${DURATION}
+
+    done
