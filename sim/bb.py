@@ -2,7 +2,7 @@ import argparse
 import os
 
 import env
-from utils.utils import adjust_traces, load_traces
+from utils.utils import adjust_n_random_traces, load_traces, adjust_traces_one_random
 import numpy as np
 
 # bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and
@@ -28,13 +28,16 @@ CUSHION = 10  # BB
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Pensieve testing script.")
+        description="BBA testing script.")
     parser.add_argument("--test_trace_dir", type=str,
                         required=True, help='dir to all test traces.')
     parser.add_argument("--summary_dir", type=str,
                         required=True, help='output path.')
-    parser.add_argument("--noise", type=float, default=0,)
+    parser.add_argument("--random_seed", type=int, default=11)
     parser.add_argument("--duration", type=float, default=1.0)
+    parser.add_argument( '--ROBUST_NOISE', type=float, default='0.1', help='' )
+    parser.add_argument( '--SAMPLE_LENGTH', type=int, default='4', help='' )
+    parser.add_argument( '--NUMBER_PICK', type=int, default='1', help='' )
 
     return parser.parse_args()
 
@@ -48,9 +51,17 @@ def main():
 
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         args.test_trace_dir)
-    all_cooked_time, all_cooked_bw = adjust_traces(
-        all_cooked_time, all_cooked_bw, bw_noise=args.noise,
-        duration_factor=args.duration)
+    # all_cooked_time, all_cooked_bw = adjust_traces(
+    #     all_cooked_time, all_cooked_bw, bw_noise=args.noise,
+    #     duration_factor=args.duration)
+
+    all_cooked_time, all_cooked_bw = adjust_n_random_traces(
+        all_cooked_time,
+        all_cooked_bw,
+        args.random_seed,
+        args.ROBUST_NOISE,
+        args.SAMPLE_LENGTH,
+        args.NUMBER_PICK )
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw, fixed=True)

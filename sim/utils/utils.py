@@ -121,10 +121,11 @@ def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_len
         sublist = trace_bw[start_index: start_index + sample_length]
         new_sublist = []
         for i in sublist:
-            if i + robust_noise > 0:
-                i = i + robust_noise
-            else:
-                i = i
+            i = i*float(1+robust_noise)
+            # if i + robust_noise > 0:
+            #     i = i + robust_noise
+            # else:
+            #     i = i
             new_sublist.append(i)
         trace_bw[start_index:start_index + sample_length] = new_sublist
 
