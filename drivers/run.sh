@@ -28,16 +28,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
-           python ${SIMULATOR_DIR}/bb.py \
-               --test_trace_dir ${TRACE_PATH} \
-               --summary_dir ${SUMMARY_DIR}\
-               --random_seed ${RANDOM_SEED}  \
-               --ROBUST_NOISE=-0.1 \
-               --SAMPLE_LENGTH=3 \
-               --NUMBER_PICK=53 \
-               --duration ${DURATION} &
-
-      #     for ((i=0;i<${#NN_MODELS[@]};++i)); do
+        #for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
                    --test_trace_dir ${TRACE_PATH} \
                    --summary_dir ${SUMMARY_DIR}\
@@ -47,5 +38,16 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
                    --SAMPLE_LENGTH=3 \
                    --NUMBER_PICK=53 \
                    --duration ${DURATION} &
-           done
+
+           python ${SIMULATOR_DIR}/bb.py \
+               --test_trace_dir ${TRACE_PATH} \
+               --summary_dir ${SUMMARY_DIR}\
+               --random_seed ${RANDOM_SEED}  \
+               --ROBUST_NOISE=-0.1 \
+               --SAMPLE_LENGTH=3 \
+               --NUMBER_PICK=53 \
+               --duration ${DURATION} &
+
+
+    done
 
