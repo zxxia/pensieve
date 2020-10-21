@@ -24,7 +24,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
 
 
     for RANDOM_SEED in {1..100}; do
-      SUMMARY_DIR="../results/robust_BBA_Pensieve_add_-0.1_length3_pick54/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/robust_BBA_Pensieve_add_-0.2_length20_pick54/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
@@ -34,8 +34,8 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
                    --summary_dir ${SUMMARY_DIR}\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
-                   --ROBUST_NOISE=-0.1 \
-                   --SAMPLE_LENGTH=3 \
+                   --ROBUST_NOISE=-0.2 \
+                   --SAMPLE_LENGTH=20 \
                    --NUMBER_PICK=53 \
                    --duration ${DURATION} &
 
@@ -43,8 +43,8 @@ NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
                  --test_trace_dir ${TRACE_PATH} \
                  --summary_dir ${SUMMARY_DIR}\
                  --random_seed ${RANDOM_SEED}  \
-                 --ROBUST_NOISE=-0.1 \
-                 --SAMPLE_LENGTH=3 \
+                 --ROBUST_NOISE=-0.2 \
+                 --SAMPLE_LENGTH=20 \
                  --NUMBER_PICK=53 \
                  --duration ${DURATION}
 
