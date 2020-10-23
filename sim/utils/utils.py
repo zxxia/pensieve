@@ -1,6 +1,5 @@
 import math
 import os
-import numpy as np
 import random
 import env
 
@@ -33,7 +32,7 @@ def load_traces(trace_dir):
 def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=1):
     new_all_bw = []
     new_all_ts = []
-    np.random.seed(random_seed)
+    random.seed(random_seed)
     #### add noise to a segment of noise
 
 
@@ -106,7 +105,7 @@ def adjust_traces_one_random(all_ts, all_bw, random_seed, robust_noise, sample_l
 def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_length, number_pick):
     new_all_bw = all_bw.copy()
     new_all_ts = all_ts.copy()
-    np.random.seed(random_seed)
+    random.seed(random_seed)
 
     number_of_traces = len(all_ts)
 
