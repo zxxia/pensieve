@@ -1,6 +1,7 @@
 import math
 import os
 import random
+import numpy as np
 import env
 
 
@@ -106,6 +107,7 @@ def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_len
     new_all_bw = all_bw.copy()
     new_all_ts = all_ts.copy()
     random.seed(random_seed)
+    np.random.seed(random_seed)
 
     number_of_traces = len(all_ts)
 
@@ -120,12 +122,21 @@ def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_len
         sublist = trace_bw[start_index: start_index + sample_length]
         new_sublist = []
         for i in sublist:
-            i = i*float(1+robust_noise)
+            # add constant noise
+            # i = i*float(1+robust_noise)
             # if i + robust_noise > 0:
             #     i = i + robust_noise
             # else:
             #     i = i
-            new_sublist.append(i)
+            # new_sublist.append(i)
+
+            # add normal noise
+            noise = np.random.normal( 0, 0.1, 1 )
+            if noise < -0.5 or noise > 0.5:
+                noise = 0
+            delta = 1 + float( noise )
+            new_sublist.append( i * delta )
+
         trace_bw[start_index:start_index + sample_length] = new_sublist
 
     assert len(new_all_ts) == len(all_ts)
