@@ -4,11 +4,11 @@
 set -e
 
 DURATION=1
-TRACE_PATH="../data/train_cut"
+# TRACE_PATH="../data/train_cut"
 # TRACE_PATH="../sim/train_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
-#TRACE_PATH="../data/test"
+TRACE_PATH="../data/test"
 #TRACE_PATH="../data/train"
 # SUMMARY_DIR="../results/duration_exp/duration_quarter"
 # NN_MODELS=( "../sim/results_noise0.5/nn_model_ep_5300.ckpt" )
@@ -25,7 +25,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
 
 
     for RANDOM_SEED in {1..50}; do
-      SUMMARY_DIR="../results/robustness_train/train_cut_-0.3_length20/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/robustness_test/test_all_-0.3_length20/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
@@ -37,7 +37,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
                    --random_seed ${RANDOM_SEED} \
                    --ROBUST_NOISE=-0.3 \
                    --SAMPLE_LENGTH=20 \
-                   --NUMBER_PICK=253 \
+                   --NUMBER_PICK=53 \
                    --duration ${DURATION} &
 
            python ${SIMULATOR_DIR}/bb.py \
@@ -46,7 +46,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
                  --random_seed ${RANDOM_SEED}  \
                  --ROBUST_NOISE=-0.3 \
                  --SAMPLE_LENGTH=20 \
-                 --NUMBER_PICK=253 \
+                 --NUMBER_PICK=53 \
                  --duration ${DURATION} &
 
             python ${SIMULATOR_DIR}/mpc.py \
@@ -55,7 +55,7 @@ NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
                  --random_seed ${RANDOM_SEED}  \
                  --ROBUST_NOISE=-0.3 \
                  --SAMPLE_LENGTH=20 \
-                 --NUMBER_PICK=253 \
+                 --NUMBER_PICK=53 \
                  --duration ${DURATION}
 
 
