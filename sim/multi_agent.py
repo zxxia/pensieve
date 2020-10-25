@@ -418,15 +418,15 @@ def central_agent(args, net_params_queues, exp_queues):
                               yaxis={'title': 'Mean Reward'})
                 vis._send(
                     {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_reward_' + args.start_time})
-                trace = dict(x=testing_epochs, y=average_entropies, mode="markers+lines", type='custom',
-                             marker={'color': PLOT_COLOR,
-                                     'symbol': 104, 'size': "5"},
-                             text=["one", "two", "three"], name='1st Trace')
-                layout = dict(title="Pensieve_Training_Mean Entropy " + suffix,
-                              xaxis={'title': 'Epoch'},
-                              yaxis={'title': 'Mean Entropy'})
-                vis._send(
-                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_entropy_' + args.start_time})
+                # trace = dict(x=testing_epochs, y=average_entropies, mode="markers+lines", type='custom',
+                #              marker={'color': PLOT_COLOR,
+                #                      'symbol': 104, 'size': "5"},
+                #              text=["one", "two", "three"], name='1st Trace')
+                # layout = dict(title="Pensieve_Training_Mean Entropy " + suffix,
+                #               xaxis={'title': 'Epoch'},
+                #               yaxis={'title': 'Mean Entropy'})
+                # vis._send(
+                #     {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_entropy_' + args.start_time})
 
                 avg_val_reward = testing(
                     args, epoch, actor, val_log_file, args.val_trace_dir,
