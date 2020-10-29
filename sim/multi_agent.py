@@ -72,7 +72,8 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
         bw_noise=noise, duration_factor=duration)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
-                              all_cooked_bw=all_cooked_bw)
+                              all_cooked_bw=all_cooked_bw,
+                              all_file_names=all_file_names)
 
     log_path = os.path.join(log_output_dir, 'log_sim_rl_{}'.format(
                             all_file_names[net_env.trace_idx]))
@@ -189,7 +190,8 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
             log_file = open(log_path, 'w')
 
 
-def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise, duration):
+def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise,
+            duration):
     # clean up the test results folder
     os.system('rm -r ' + test_log_folder)
     os.makedirs(test_log_folder, exist_ok=True)
@@ -444,11 +446,12 @@ def central_agent(args, net_params_queues, exp_queues):
             print(f'epoch{epoch-1}: {end_t - start_t}s')
 
 
-def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
-          exp_queue):
+def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
+          net_params_queue, exp_queue):
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
+                              all_file_names=all_file_names,
                               random_seed=agent_id)
 
     with tf.Session() as sess, open(os.path.join(
@@ -629,7 +632,8 @@ def main(args):
                              args=(args, net_params_queues, exp_queues))
     coordinator.start()
 
-    all_cooked_time, all_cooked_bw, _ = load_traces(args.train_trace_dir)
+    all_cooked_time, all_cooked_bw, all_file_names = load_traces(
+        args.train_trace_dir)
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
         bw_noise=args.noise, duration_factor=args.duration)
@@ -637,7 +641,8 @@ def main(args):
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,
                                  args=(args, i, all_cooked_time, all_cooked_bw,
-                                       net_params_queues[i], exp_queues[i])))
+                                       all_file_names, net_params_queues[i],
+                                       exp_queues[i])))
     for i in range(args.NUM_AGENTS):
         agents[i].start()
 
