@@ -56,10 +56,10 @@ def main():
             throughput = row[6]
 
             k = (uid, target)
-            if k in bw_measurements:
-                bw_measurements[k].append(throughput)
-            else:
-                bw_measurements[k] = [throughput]
+            if k not in bw_measurements:
+                bw_measurements[k] = []
+            bw_measurements[k].append(
+                float(throughput) * BITS_IN_BYTE / MICROSEC_IN_SEC)
 
             line_counter += 1
             if line_counter >= NUM_LINES:
@@ -67,17 +67,19 @@ def main():
     print(len(unique_targets))
     print(len(unique_addresses))
 
-    for k in bw_measurements:
+    for k, bw_list in bw_measurements.items():
+        # filter out inappropriate traces as the paper mentions
         out_file = 'trace_' + '_'.join(k)
         out_file = out_file.replace(':', '-')
         out_file = out_file.replace('/', '-')
         out_file = os.path.join(output_dir, out_file)
+        if min(bw_list) < 0.2 or np.mean(bw_list) > 6 or len(bw_list) < 5:
+            print('skip', out_file)
+            continue
         with open(out_file, 'w') as f:
-            csvwriter = csv.writer(f)
-            for i, bw in enumerate(bw_measurements[k]):
-                csvwriter.writerow(
-                    [i * TIME_INTERVAL,
-                     float(bw) * BITS_IN_BYTE / MICROSEC_IN_SEC])
+            csvwriter = csv.writer(f, delimiter='\t')
+            for i, bw in enumerate(bw_list):
+                csvwriter.writerow([i * TIME_INTERVAL, bw])
 
 
 if __name__ == '__main__':
