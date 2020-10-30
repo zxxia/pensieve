@@ -20,12 +20,12 @@ SIMULATOR_DIR="../sim"
 
 
 #NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
-NN_MODELS="../data/model_saved/Norway-DR/nn_model_ep_7000.ckpt" # model from Zhengxu
+NN_MODELS="../data/model_saved/Norway-DR/nn_model_ep_23100.ckpt" # model from Zhengxu
 #RANDOM_SEED=41
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-test/Norway-uniform-7000/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/DR-test/Norway-uniform-small-23100/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
@@ -49,14 +49,14 @@ NN_MODELS="../data/model_saved/Norway-DR/nn_model_ep_7000.ckpt" # model from Zhe
 #                 --NUMBER_PICK=253 \
 #                 --duration ${DURATION} &
 
-            python ${SIMULATOR_DIR}/mpc.py \
-                 --test_trace_dir ${TRACE_PATH} \
-                 --summary_dir ${SUMMARY_DIR}\
-                 --random_seed ${RANDOM_SEED}  \
-                 --ROBUST_NOISE=0 \
-                 --SAMPLE_LENGTH=0 \
-                 --NUMBER_PICK=0 \
-                 --duration ${DURATION}
+#            python ${SIMULATOR_DIR}/mpc.py \
+#                 --test_trace_dir ${TRACE_PATH} \
+#                 --summary_dir ${SUMMARY_DIR}\
+#                 --random_seed ${RANDOM_SEED}  \
+#                 --ROBUST_NOISE=0 \
+#                 --SAMPLE_LENGTH=0 \
+#                 --NUMBER_PICK=0 \
+#                 --duration ${DURATION}
 
 
     done
