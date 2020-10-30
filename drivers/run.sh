@@ -4,7 +4,7 @@
 set -e
 
 DURATION=1
-TRACE_PATH="../data/train_cut"
+TRACE_PATH="../data/FCC-DR-exp/FCC-test"
 # TRACE_PATH="../sim/train_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
@@ -20,12 +20,12 @@ SIMULATOR_DIR="../sim"
 
 
 #NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
-NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
+NN_MODELS="../data/model_saved/Norway-DR/nn_model_ep_7000.ckpt" # model from Zhengxu
 #RANDOM_SEED=41
 
 
-    for RANDOM_SEED in {1..50}; do
-      SUMMARY_DIR="../results/robustness_test/train_Normal_-0.3_length20/seed_${RANDOM_SEED}"
+    for RANDOM_SEED in 1; do
+      SUMMARY_DIR="../results/DR-test/Norway-uniform-7000/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
@@ -35,27 +35,27 @@ NN_MODELS="../data/model_saved/nn_model_ep_94000.ckpt" # model from Zhengxu
                    --summary_dir ${SUMMARY_DIR}\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
-                   --ROBUST_NOISE=-0.3 \
-                   --SAMPLE_LENGTH=20 \
-                   --NUMBER_PICK=253 \
+                   --ROBUST_NOISE=0 \
+                   --SAMPLE_LENGTH=0 \
+                   --NUMBER_PICK=0 \
                    --duration ${DURATION} &
 
-           python ${SIMULATOR_DIR}/bb.py \
-                 --test_trace_dir ${TRACE_PATH} \
-                 --summary_dir ${SUMMARY_DIR}\
-                 --random_seed ${RANDOM_SEED}  \
-                 --ROBUST_NOISE=-0.3 \
-                 --SAMPLE_LENGTH=20 \
-                 --NUMBER_PICK=253 \
-                 --duration ${DURATION} &
+#           python ${SIMULATOR_DIR}/bb.py \
+#                 --test_trace_dir ${TRACE_PATH} \
+#                 --summary_dir ${SUMMARY_DIR}\
+#                 --random_seed ${RANDOM_SEED}  \
+#                 --ROBUST_NOISE=-0.3 \
+#                 --SAMPLE_LENGTH=20 \
+#                 --NUMBER_PICK=253 \
+#                 --duration ${DURATION} &
 
             python ${SIMULATOR_DIR}/mpc.py \
                  --test_trace_dir ${TRACE_PATH} \
                  --summary_dir ${SUMMARY_DIR}\
                  --random_seed ${RANDOM_SEED}  \
-                 --ROBUST_NOISE=-0.3 \
-                 --SAMPLE_LENGTH=20 \
-                 --NUMBER_PICK=253 \
+                 --ROBUST_NOISE=0 \
+                 --SAMPLE_LENGTH=0 \
+                 --NUMBER_PICK=0 \
                  --duration ${DURATION}
 
 
