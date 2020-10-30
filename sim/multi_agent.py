@@ -16,14 +16,14 @@ from utils.utils import adjust_traces, load_traces
 from datetime import datetime
 
 
-## Visdom Settings
+# Visdom Settings
 vis = visdom.Visdom()
 assert vis.check_connection()
 PLOT_COLOR = 'red'
 
 tf.logging.set_verbosity(tf.logging.INFO)
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-os.environ['CUDA_VISIBLE_DEVICES'] = "2"
+os.environ['CUDA_VISIBLE_DEVICES'] = ""
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and
@@ -38,19 +38,21 @@ DEFAULT_QUALITY = 1  # default video quality without agent
 NOISE = 0
 DURATION = 1
 
-#   args.summary_dir = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
-# args.summary_dir = f'../results/entropy_weight_exp/results_noise{NOISE}'
-#   args.summary_dir = f'../results/lr_exp/results_noise{NOISE}'
-#   args.summary_dir = '../results/results_duration_quarter'  # .format(DURATION)
-#   args.summary_dir = '../results/results_duration_quarter'  # .format(DURATION)
-#   args.summary_dir = './results_noise-1'
+# SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
+# SUMMARY_DIR = f'../results/entropy_weight_exp/results_noise{NOISE}'
+# SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
+# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
+# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
+# SUMMARY_DIR = './results_noise-1'
+# TEST_LOG_FOLDER = os.path.join(SUMMARY_DIR, 'test_results')
 # TRAIN_TRACES = './cooked_traces/'  # original trace location
 # TRAIN_TRACES = './train_sim_traces'
-TRAIN_TRACES = '../data/train'
-VAL_TRACES = '../data/val/'
-TEST_TRACES = '../data/test'
+
+# TRAIN_TRACES = '../data/train'
+# VAL_TRACES = '../data/val/'
+# TEST_TRACES = '../data/test'
 # NN_MODEL = './results/pretrain_linear_reward.ckpt'
-NN_MODEL = None
+# NN_MODEL = None
 
 
 def entropy_weight_decay_func(epoch):
@@ -58,7 +60,7 @@ def entropy_weight_decay_func(epoch):
     return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
 
 
-def test(args, test_traces_dir, actor, log_output_dir):
+def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
     np.random.seed(args.RANDOM_SEED)
     assert len(VIDEO_BIT_RATE) == args.A_DIM
 
@@ -67,7 +69,7 @@ def test(args, test_traces_dir, actor, log_output_dir):
     # handle the noise and duration variation here
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
-        bw_noise=args.NOISE, duration_factor=DURATION)
+        args.RANDOM_SEED, duration_factor=duration)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw)
@@ -137,13 +139,15 @@ def test(args, test_traces_dir, actor, log_output_dir):
         state[1, -1] = buffer_size / args.BUFFER_NORM_FACTOR  # 10 sec
         state[2, -1] = float(video_chunk_size) / \
             float(delay) / M_IN_K  # kilo byte / ms
-        state[3, -1] = float(delay) / M_IN_K / args.BUFFER_NORM_FACTOR  # 10 sec
+        state[3, -1] = float(delay) / M_IN_K / \
+            args.BUFFER_NORM_FACTOR  # 10 sec
         state[4, :args.A_DIM] = np.array(
             next_video_chunk_sizes) / M_IN_K / M_IN_K  # mega byte
         state[5, -1] = np.minimum(video_chunk_remain,
                                   args.CHUNK_TIL_VIDEO_END_CAP) / float(args.CHUNK_TIL_VIDEO_END_CAP)
 
-        action_prob = actor.predict(np.reshape(state, (1, args.S_INFO, args.S_LEN)))
+        action_prob = actor.predict(np.reshape(
+            state, (1, args.S_INFO, args.S_LEN)))
         action_cumsum = np.cumsum(action_prob)
         bit_rate = (action_cumsum > np.random.randint(
             1, args.RAND_RANGE) / float(args.RAND_RANGE)).argmax()
@@ -185,23 +189,21 @@ def test(args, test_traces_dir, actor, log_output_dir):
             log_file = open(log_path, 'w')
 
 
-def testing(epoch, actor, log_file, trace_dir):
-    TEST_LOG_FOLDER = os.path.join( args.summary_dir, 'test_results' )
-
+def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise, duration):
     # clean up the test results folder
-    os.system('rm -r ' + TEST_LOG_FOLDER)
-    os.makedirs(TEST_LOG_FOLDER, exist_ok=True)
+    os.system('rm -r ' + test_log_folder)
+    os.makedirs(test_log_folder, exist_ok=True)
 
     # run test script
-    test(args, trace_dir, actor, TEST_LOG_FOLDER)
+    test(args, trace_dir, actor, test_log_folder, noise, duration)
 
     # append test performance to the log
     rewards = []
-    test_log_files = os.listdir(TEST_LOG_FOLDER)
+    test_log_files = os.listdir(test_log_folder)
     print(len(test_log_files))
     for test_log_file in test_log_files:
         reward = []
-        with open(os.path.join(TEST_LOG_FOLDER, test_log_file), 'r') as f:
+        with open(os.path.join(test_log_folder, test_log_file), 'r') as f:
             for line in f:
                 parse = line.split()
                 try:
@@ -230,6 +232,7 @@ def testing(epoch, actor, log_file, trace_dir):
     return rewards_mean
 
 
+# , train_trace_dir, val_trace_dir, test_trace_dir, noise, duration):
 def central_agent(args, net_params_queues, exp_queues):
     # Visdom Logs
     testing_epochs = []
@@ -244,14 +247,14 @@ def central_agent(args, net_params_queues, exp_queues):
     assert len(net_params_queues) == args.NUM_AGENTS
     assert len(exp_queues) == args.NUM_AGENTS
 
-    logging.basicConfig(filename=os.path.join(  args.summary_dir,  'log_central'),
-                        filemode='w',
-                        level=logging.INFO)
+    logging.basicConfig(filename=os.path.join(args.summary_dir, 'log_central'),
+                        filemode='w', level=logging.INFO)
 
     with tf.Session() as sess, \
-            open(os.path.join(  args.summary_dir, 'log_test'), 'w', 1) as test_log_file, \
-            open(os.path.join(  args.summary_dir, 'log_train'), 'w', 1) as log_central_file, \
-            open(os.path.join(  args.summary_dir, 'log_val'), 'w', 1) as val_log_file:
+            open(os.path.join(args.summary_dir, 'log_test'), 'w', 1) as test_log_file, \
+            open(os.path.join(args.summary_dir, 'log_train'), 'w', 1) as log_central_file, \
+            open(os.path.join(args.summary_dir, 'log_val'), 'w', 1) as val_log_file, \
+            open(os.path.join(args.summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
@@ -260,9 +263,13 @@ def central_agent(args, net_params_queues, exp_queues):
         val_log_file.write("\t".join(
             ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
              'rewards_median', 'rewards_95per', 'rewards_max\n']))
+        train_e2e_log_file.write("\t".join(
+            ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
+             'rewards_median', 'rewards_95per', 'rewards_max\n']))
 
         actor = a3c.ActorNetwork(sess,
-                                 state_dim=[args.S_INFO, args.S_LEN], action_dim=args.A_DIM,
+                                 state_dim=[args.S_INFO,
+                                            args.S_LEN], action_dim=args.A_DIM,
                                  learning_rate=args.ACTOR_LR_RATE)
         critic = a3c.CriticNetwork(sess,
                                    state_dim=[args.S_INFO, args.S_LEN],
@@ -273,20 +280,19 @@ def central_agent(args, net_params_queues, exp_queues):
 
         sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter(
-              args.summary_dir, sess.graph)  # training monitor
+            args.summary_dir, sess.graph)  # training monitor
         saver = tf.train.Saver(max_to_keep=15)  # save neural net parameters
 
         # restore neural net parameters
-        nn_model = NN_MODEL
-        if nn_model is not None:  # nn_model is the path to file
-            saver.restore(sess, nn_model)
+        if args.nn_model is not None:  # nn_model is the path to file
+            saver.restore(sess, args.nn_model)
             print("Model restored.")
 
         epoch = 0
 
         # assemble experiences from agents, compute the gradients
         max_avg_reward = None
-        while epoch < args.TOTAL_EPOCH:
+        while True:
             start_t = time.time()
             # synchronize the network parameters of work agent
             actor_net_params = actor.get_network_params()
@@ -373,68 +379,83 @@ def central_agent(args, net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
+                _ = testing(args, epoch, actor, train_e2e_log_file,
+                            args.train_trace_dir,
+                            os.path.join(args.summary_dir, 'test_results'),
+                            args.noise, args.duration)
+                _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
+                            os.path.join(args.summary_dir, 'test_results'),
+                            args.noise, args.duration)
 
                 # Visdom log and plot
-                test_mean_reward = testing(epoch, actor, test_log_file, TEST_TRACES)
-                testing_epochs.append( epoch )
-                testing_mean_rewards.append( test_mean_reward )
-                average_rewards.append( np.sum( avg_reward ) )
-                average_entropies.append( avg_entropy )
+                test_mean_reward = testing(
+                    args, epoch, actor, val_log_file, args.val_trace_dir,
+                    os.path.join(args.summary_dir, 'test_results'),
+                    args.noise, args.duration)
+                testing_epochs.append(epoch)
+                testing_mean_rewards.append(test_mean_reward)
+                average_rewards.append(np.sum(avg_reward))
+                average_entropies.append(avg_entropy)
 
                 suffix = args.start_time
                 if args.description is not None:
                     suffix = args.description
-                trace = dict( x=testing_epochs, y=testing_mean_rewards, mode="markers+lines", type='custom',
-                              marker={'color': PLOT_COLOR, 'symbol': 104, 'size': "5"},
-                              text=["one", "two", "three"], name='1st Trace' )
-                layout = dict( title="Pensieve_Testing_Reward " + suffix,
-                               xaxis={'title': 'Epoch'},
-                               yaxis={'title': 'Mean Reward'} )
+                trace = dict(x=testing_epochs, y=testing_mean_rewards, mode="markers+lines", type='custom',
+                             marker={'color': PLOT_COLOR,
+                                     'symbol': 104, 'size': "5"},
+                             text=["one", "two", "three"], name='1st Trace')
+                layout = dict(title="Pensieve_Testing_Reward " + suffix,
+                              xaxis={'title': 'Epoch'},
+                              yaxis={'title': 'Mean Reward'})
                 vis._send(
-                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_testing_mean_reward_' + args.start_time} )
-                trace = dict( x=testing_epochs, y=average_rewards, mode="markers+lines", type='custom',
-                              marker={'color': PLOT_COLOR, 'symbol': 104, 'size': "5"},
-                              text=["one", "two", "three"], name='1st Trace' )
-                layout = dict( title="Pensieve_Training_Reward " + suffix,
-                               xaxis={'title': 'Epoch'},
-                               yaxis={'title': 'Mean Reward'} )
+                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_testing_mean_reward_' + args.start_time})
+                trace = dict(x=testing_epochs, y=average_rewards, mode="markers+lines", type='custom',
+                             marker={'color': PLOT_COLOR,
+                                     'symbol': 104, 'size': "5"},
+                             text=["one", "two", "three"], name='1st Trace')
+                layout = dict(title="Pensieve_Training_Reward " + suffix,
+                              xaxis={'title': 'Epoch'},
+                              yaxis={'title': 'Mean Reward'})
                 vis._send(
-                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_reward_' + args.start_time} )
-                trace = dict( x=testing_epochs, y=average_entropies, mode="markers+lines", type='custom',
-                              marker={'color': PLOT_COLOR, 'symbol': 104, 'size': "5"},
-                              text=["one", "two", "three"], name='1st Trace' )
-                layout = dict( title="Pensieve_Training_Mean Entropy " + suffix,
-                               xaxis={'title': 'Epoch'},
-                               yaxis={'title': 'Mean Entropy'} )
+                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_reward_' + args.start_time})
+                trace = dict(x=testing_epochs, y=average_entropies, mode="markers+lines", type='custom',
+                             marker={'color': PLOT_COLOR,
+                                     'symbol': 104, 'size': "5"},
+                             text=["one", "two", "three"], name='1st Trace')
+                layout = dict(title="Pensieve_Training_Mean Entropy " + suffix,
+                              xaxis={'title': 'Epoch'},
+                              yaxis={'title': 'Mean Entropy'})
                 vis._send(
-                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_entropy_' + args.start_time} )
-
+                    {'data': [trace], 'layout': layout, 'win': 'Pensieve_training_mean_entropy_' + args.start_time})
 
                 avg_val_reward = testing(
-                    epoch, actor, val_log_file, VAL_TRACES)
+                    args, epoch, actor, val_log_file, args.val_trace_dir,
+                    os.path.join(args.summary_dir, 'test_results'),
+                    args.noise, args.duration)
                 if max_avg_reward is None or (avg_val_reward > max_avg_reward):
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
                         sess,
-                        os.path.join(  args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
+                        os.path.join(args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
             print(f'epoch{epoch-1}: {end_t - start_t}s')
 
-            
 
-def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_queue):
+def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
+          exp_queue):
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
                               random_seed=agent_id)
 
     with tf.Session() as sess, open(os.path.join(
-              args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
+            args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
         actor = a3c.ActorNetwork(sess,
-                                 state_dim=[args.S_INFO, args.S_LEN], action_dim=args.A_DIM,
+                                 state_dim=[args.S_INFO,
+                                            args.S_LEN], action_dim=args.A_DIM,
                                  learning_rate=args.ACTOR_LR_RATE)
         critic = a3c.CriticNetwork(sess,
                                    state_dim=[args.S_INFO, args.S_LEN],
@@ -456,9 +477,9 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
         r_batch = []
         entropy_record = []
 
-        epoch = 0
         time_stamp = 0
-        while epoch < args.TOTAL_EPOCH:  # experience video streaming forever
+        epoch = 0
+        while True:  # experience video streaming forever
 
             # the action is from the last decision
             # this is to make the framework similar to the real
@@ -509,14 +530,16 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
             state[1, -1] = buffer_size / args.BUFFER_NORM_FACTOR  # 10 sec
             state[2, -1] = float(video_chunk_size) / \
                 float(delay) / M_IN_K  # kilo byte / ms
-            state[3, -1] = float(delay) / M_IN_K / args.BUFFER_NORM_FACTOR  # 10 sec
+            state[3, -1] = float(delay) / M_IN_K / \
+                args.BUFFER_NORM_FACTOR  # 10 sec
             state[4, :args.A_DIM] = np.array(
                 next_video_chunk_sizes) / M_IN_K / M_IN_K  # mega byte
             state[5, -1] = np.minimum(video_chunk_remain,
                                       args.CHUNK_TIL_VIDEO_END_CAP) / float(args.CHUNK_TIL_VIDEO_END_CAP)
 
             # compute action probability vector
-            action_prob = actor.predict(np.reshape(state, (1, args.S_INFO, args.S_LEN)))
+            action_prob = actor.predict(np.reshape(
+                state, (1, args.S_INFO, args.S_LEN)))
             action_cumsum = np.cumsum(action_prob)
             bit_rate = (action_cumsum > np.random.randint(
                 1, args.RAND_RANGE) / float(args.RAND_RANGE)).argmax()
@@ -532,7 +555,10 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
                            str(rebuf) + '\t' +
                            str(video_chunk_size) + '\t' +
                            str(delay) + '\t' +
-                           str(reward) + '\n')
+                           str(reward) + '\t' +
+                           str(epoch) + '\t' +
+                           str(net_env.trace_idx) + '\t' +
+                           str(net_env.mahimahi_ptr)+'\n')
             log_file.flush()
 
             # report experience to the coordinator
@@ -567,8 +593,6 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
                 s_batch.append(np.zeros((args.S_INFO, args.S_LEN)))
                 a_batch.append(action_vec)
 
-                epoch+=1
-
             else:
                 s_batch.append(state)
 
@@ -580,17 +604,16 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue, exp_
 def main(args):
 
     start_time = datetime.now()
-    start_time_string = start_time.strftime( "%Y%m%d_%H%M%S" )
+    start_time_string = start_time.strftime("%Y%m%d_%H%M%S")
     args.start_time = start_time_string
 
     np.random.seed(args.RANDOM_SEED)
     assert len(VIDEO_BIT_RATE) == args.A_DIM
 
     # create result directory
-    if not os.path.exists(  args.summary_dir):
-        os.makedirs(  args.summary_dir)
+    if not os.path.exists(args.summary_dir):
+        os.makedirs(args.summary_dir)
 
-    args.results_dir =   args.summary_dir
     config.log_config(args)
 
     # inter-process communication queues
@@ -603,21 +626,18 @@ def main(args):
     # create a coordinator and multiple agent processes
     # (note: threading is not desirable due to python GIL)
     coordinator = mp.Process(target=central_agent,
-                             args=(args,
-                                   net_params_queues,
-                                   exp_queues))
+                             args=(args, net_params_queues, exp_queues))
     coordinator.start()
 
-    all_cooked_time, all_cooked_bw, _ = load_traces(TRAIN_TRACES)
+    all_cooked_time, all_cooked_bw, _ = load_traces(args.train_trace_dir)
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw,
-        bw_noise=args.NOISE, duration_factor=DURATION)
+        args.RANDOM_SEED, duration_factor=args.duration)
     agents = []
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,
                                  args=(args, i, all_cooked_time, all_cooked_bw,
-                                       net_params_queues[i],
-                                       exp_queues[i])))
+                                       net_params_queues[i], exp_queues[i])))
     for i in range(args.NUM_AGENTS):
         agents[i].start()
 

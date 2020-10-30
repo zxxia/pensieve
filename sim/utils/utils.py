@@ -30,12 +30,11 @@ def load_traces(trace_dir):
 
     return all_ts, all_bw, all_file_names
 
-def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=1):
+
+def adjust_traces(all_ts, all_bw, random_seed, duration_factor=1):
     new_all_bw = []
     new_all_ts = []
     random.seed(random_seed)
-    #### add noise to a segment of noise
-
 
     #### add noise to each BW
     for trace_ts, trace_bw in zip(all_ts, all_bw):
@@ -47,38 +46,18 @@ def adjust_traces(all_ts, all_bw, test_traces_dir, random_seed, duration_factor=
             for t, bw in zip(trace_ts, trace_bw):
                 if (t + i * duration) <= new_duration:
                     new_trace_ts.append(t + i * duration)
-                    noise = np.random.normal(0, 0.05, 1)
-                    if noise < -0.05:
+                    noise = np.random.uniform(-2, 5, 1)
+                    if bw+noise < 0:
                         noise = 0
-                    delta = 1+float(noise)
-                    new_trace_bw.append(bw*delta)
+                    new_trace_bw.append(bw+noise)
 
         new_all_ts.append(new_trace_ts)
         new_all_bw.append(new_trace_bw)
     assert len(new_all_ts) == len(all_ts)
     assert len(new_all_bw) == len(all_bw)
 
-    # all_cooked_time, all_cooked_bw, all_file_names = load_traces(
-    #     test_traces_dir )
-    # net_env = env.Environment( all_cooked_time=all_cooked_time,
-    #                            all_cooked_bw=all_cooked_bw, fixed=True )
-    # # log new traces with noise
-    #
-    # noise_dir = os.path.join("../noise_traces/", str(random_seed))
-    # try:
-    #     os.mkdir(noise_dir)
-    # except:
-    #     pass
-    #
-    # log_path = os.path.join(noise_dir,
-    #                         all_file_names[net_env.trace_idx])
-    #
-    # log_file = open( log_path, 'w' )
-    # for index in range( len( new_all_ts ) ):
-    #     log_file.write( str( new_all_ts[index] ) + '\t' + str(new_all_bw[index] ) + "\n" )
-    # log_file.close()
-
     return new_all_ts, new_all_bw
+
 
 def adjust_traces_one_random(all_ts, all_bw, random_seed, robust_noise, sample_length):
     adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_length, number_pick=1)
