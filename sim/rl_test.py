@@ -69,11 +69,11 @@ def main():
         test_trace_dir)
     #print(len(all_cooked_bw))
     print(min(min(all_cooked_bw)), max(max(all_cooked_bw)))
-    # all_cooked_time, all_cooked_bw = adjust_traces(
-    #     all_cooked_time,
-    #     all_cooked_bw,
-    #     test_trace_dir,
-    #     args.random_seed)
+    all_cooked_time, all_cooked_bw = adjust_traces(
+        all_cooked_time,
+        all_cooked_bw,
+        test_trace_dir,
+        args.random_seed)
 
     # adjust_traces_one_random(all_ts, all_bw, random_seed, sample_length = 4):
     # all_cooked_time, all_cooked_bw = adjust_n_random_traces(

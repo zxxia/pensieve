@@ -67,9 +67,9 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_traces_dir)
     # handle the noise and duration variation here
-    all_cooked_time, all_cooked_bw = adjust_traces(
-        all_cooked_time, all_cooked_bw,
-        args.RANDOM_SEED, duration_factor=duration)
+    # all_cooked_time, all_cooked_bw = adjust_traces(
+    #     all_cooked_time, all_cooked_bw,
+    #     args.RANDOM_SEED, duration_factor=duration)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw)
@@ -630,9 +630,9 @@ def main(args):
     coordinator.start()
 
     all_cooked_time, all_cooked_bw, _ = load_traces(args.train_trace_dir)
-    all_cooked_time, all_cooked_bw = adjust_traces(
-        all_cooked_time, all_cooked_bw,
-        args.RANDOM_SEED, duration_factor=args.duration)
+    # all_cooked_time, all_cooked_bw = adjust_traces(
+    #     all_cooked_time, all_cooked_bw,
+    #     args.RANDOM_SEED, duration_factor=args.duration)
     agents = []
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,

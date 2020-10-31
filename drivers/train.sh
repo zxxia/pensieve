@@ -33,7 +33,7 @@ LOG_FILES=( '0' '1' '2' '3' )
 
 for NOISE in 0 ; do
     # SUMMARY_DIR="../results/noise_exp/noise_${NOISE}"
-    SUMMARY_DIR="../results/LVC-DR-train/multiply-1-2-train/noise_${NOISE}"
+    SUMMARY_DIR="../results/LVC-DR-train/no-noise/noise_${NOISE}"
     # SUMMARY_DIR="../results/exponential_traces/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period20/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period40_changing_peak/results_noise_${NOISE}_duration_${DURATION}"
