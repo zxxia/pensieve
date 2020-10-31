@@ -4,7 +4,7 @@
 set -e
 
 DURATION=1
-TRACE_PATH="../data/FCC-DR-exp/FCC-test"
+TRACE_PATH="../data/Norway-DR-exp/train"
 # TRACE_PATH="../sim/train_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
@@ -20,12 +20,13 @@ SIMULATOR_DIR="../sim"
 
 
 #NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
-NN_MODELS="../data/model_saved/Norway-DR/nn_model_ep_23100.ckpt" # model from Zhengxu
+#NN_MODELS="../data/model_saved/Norway-DR/multiply-noise/nn_model_ep_25100.ckpt"
+NN_MODELS="../results/FCC-DR/noise_0/nn_model_ep_27300.ckpt" # model from Zhengxu
 #RANDOM_SEED=41
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-test/Norway-uniform-small-23100/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/tmp/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 

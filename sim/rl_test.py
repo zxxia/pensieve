@@ -67,7 +67,8 @@ def main():
 
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_trace_dir)
-    print(len(all_cooked_time[-1]))
+    #print(len(all_cooked_bw))
+    print(min(min(all_cooked_bw)), max(max(all_cooked_bw)))
     # all_cooked_time, all_cooked_bw = adjust_traces(
     #     all_cooked_time,
     #     all_cooked_bw,
@@ -75,16 +76,16 @@ def main():
     #     args.random_seed)
 
     # adjust_traces_one_random(all_ts, all_bw, random_seed, sample_length = 4):
-    all_cooked_time, all_cooked_bw = adjust_n_random_traces(
-        all_cooked_time,
-        all_cooked_bw,
-        args.random_seed,
-        args.ROBUST_NOISE,
-        args.SAMPLE_LENGTH,
-        args.NUMBER_PICK)
+    # all_cooked_time, all_cooked_bw = adjust_n_random_traces(
+    #     all_cooked_time,
+    #     all_cooked_bw,
+    #     args.random_seed,
+    #     args.ROBUST_NOISE,
+    #     args.SAMPLE_LENGTH,
+    #     args.NUMBER_PICK)
 
 
-    print(len(all_cooked_time[-1]))
+    #print(len(all_cooked_time[-1]))
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw, fixed=True)
