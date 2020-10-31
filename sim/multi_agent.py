@@ -67,9 +67,9 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_traces_dir)
     # handle the noise and duration variation here
-    # all_cooked_time, all_cooked_bw = adjust_traces(
-    #     all_cooked_time, all_cooked_bw,
-    #     args.RANDOM_SEED, duration_factor=duration)
+    all_cooked_time, all_cooked_bw = adjust_traces(
+        all_cooked_time, all_cooked_bw,
+        args.RANDOM_SEED, duration_factor=duration)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw)
@@ -292,6 +292,8 @@ def central_agent(args, net_params_queues, exp_queues):
 
         # assemble experiences from agents, compute the gradients
         max_avg_reward = None
+        max_train_reward = None
+
         while True:
             start_t = time.time()
             # synchronize the network parameters of work agent
@@ -432,7 +434,11 @@ def central_agent(args, net_params_queues, exp_queues):
                     args, epoch, actor, val_log_file, args.val_trace_dir,
                     os.path.join(args.summary_dir, 'test_results'),
                     args.noise, args.duration)
-                if max_avg_reward is None or (avg_val_reward > max_avg_reward):
+                avg_train_reward = np.sum(avg_reward)
+
+                if max_avg_reward is None or (avg_val_reward > max_avg_reward) \
+                        or (avg_train_reward > max_train_reward):
+                    max_train_reward = avg_train_reward
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
@@ -630,9 +636,9 @@ def main(args):
     coordinator.start()
 
     all_cooked_time, all_cooked_bw, _ = load_traces(args.train_trace_dir)
-    # all_cooked_time, all_cooked_bw = adjust_traces(
-    #     all_cooked_time, all_cooked_bw,
-    #     args.RANDOM_SEED, duration_factor=args.duration)
+    all_cooked_time, all_cooked_bw = adjust_traces(
+        all_cooked_time, all_cooked_bw,
+        args.RANDOM_SEED, duration_factor=args.duration)
     agents = []
     for i in range(args.NUM_AGENTS):
         agents.append(mp.Process(target=agent,
