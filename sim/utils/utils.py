@@ -36,7 +36,7 @@ def adjust_traces(all_ts, all_bw, random_seed, duration_factor=1):
     new_all_ts = []
     random.seed(random_seed)
 
-    #### add noise to each BW
+    #### add multiplied noise to each BW
     for trace_ts, trace_bw in zip(all_ts, all_bw):
         duration = trace_ts[-1]
         new_duration = duration_factor * duration
@@ -47,9 +47,9 @@ def adjust_traces(all_ts, all_bw, random_seed, duration_factor=1):
                 if (t + i * duration) <= new_duration:
                     new_trace_ts.append(t + i * duration)
                     noise = np.random.uniform(-1, 2, 1)
-                    if bw+float(noise) < 0:
-                        noise = 0
-                    new_trace_bw.append(bw+float(noise))
+                    # if bw+float(noise) < 0:
+                    #     noise = 0
+                    new_trace_bw.append(bw * float(1+noise))
 
         new_all_ts.append(new_trace_ts)
         new_all_bw.append(new_trace_bw)
