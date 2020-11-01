@@ -443,7 +443,7 @@ def central_agent(args, net_params_queues, exp_queues):
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
                         sess,
-                        os.path.join(args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
+                        os.path.join(args.summary_dir+"/model_saved/", f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
