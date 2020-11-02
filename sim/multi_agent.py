@@ -57,7 +57,7 @@ DURATION = 1
 
 def entropy_weight_decay_func(epoch):
     # linear decay
-    return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
+    return np.maximum(-0.05/(10**4) * epoch + 0.3, 0.1)
 
 
 def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
