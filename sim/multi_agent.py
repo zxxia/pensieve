@@ -93,7 +93,7 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
 
     video_count = 0
 
-    for epoch in range( args.TOTAL_EPOCH ):  # serve video forever
+    while True:  # serve video forever
         # the action is from the last decision
         # this is to make the framework similar to the real
         delay, sleep_time, buffer_size, rebuf, \
@@ -293,7 +293,7 @@ def central_agent(args, net_params_queues, exp_queues):
         max_avg_reward = None
         max_train_reward = None
 
-        for epoch in range( args.TOTAL_EPOCH ):
+        while True:
             start_t = time.time()
             # synchronize the network parameters of work agent
             actor_net_params = actor.get_network_params()
@@ -445,6 +445,9 @@ def central_agent(args, net_params_queues, exp_queues):
                         os.path.join(args.summary_dir+"/model_saved/", f"nn_model_ep_{epoch}.ckpt"))
                     logging.info("Model saved in file: " + save_path)
 
+                if epoch >= args.TOTAL_EPOCH:
+                    exit()
+
             end_t = time.time()
             print(f'epoch{epoch-1}: {end_t - start_t}s')
 
@@ -484,7 +487,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
 
         time_stamp = 0
         epoch = 0
-        for epoch in range( args.TOTAL_EPOCH ):            # experience video streaming forever
+        while True:            # experience video streaming forever
 
             # the action is from the last decision
             # this is to make the framework similar to the real
