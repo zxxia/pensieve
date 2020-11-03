@@ -281,7 +281,7 @@ def central_agent(args, net_params_queues, exp_queues):
         sess.run(tf.global_variables_initializer())
         writer = tf.summary.FileWriter(
             args.summary_dir, sess.graph)  # training monitor
-        saver = tf.train.Saver(max_to_keep=15)  # save neural net parameters
+        saver = tf.train.Saver(max_to_keep=1000)  # save neural net parameters
 
         # restore neural net parameters
         if args.nn_model is not None:  # nn_model is the path to file

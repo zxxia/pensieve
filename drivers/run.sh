@@ -23,12 +23,12 @@ SIMULATOR_DIR="../sim"
 #NN_MODELS="../data/model_saved/Norway-DR/multiply-noise/nn_model_ep_25100.ckpt"
 #NN_MODELS="../results/FCC-DR/noise_0/nn_model_ep_27300.ckpt"
 #NN_MODELS="../results/LVC-DR-train/multiply-1-2-train/noise_0/nn_model_ep_18800.ckpt"
-NN_MODELS="../results/Norway+LVC-DR-train/multiply-1-4-train/model_saved/nn_model_ep_7300.ckpt"
+NN_MODELS="../results/Norway+LVC-DR-train/multiply-1-3-train/model_saved/nn_model_ep_42700.ckpt"
 #RANDOM_SEED=41
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-test/Norway+LVC-multiply-1-4-7300/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/DR-test/Norway+LVC-multiply-1-3-42700/seed_${RANDOM_SEED}"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
