@@ -5,47 +5,39 @@ set -e
 
 NOISE=0
 DURATION=1
-TRAIN_TRACE_PATH="../data/Norway-DR-exp/train-2.5-noise"
-VAL_TRACE_PATH="../data/Norway-DR-exp/val-2.5-noise"
-TEST_TRACE_PATH="../data/Norway-DR-exp/val-2.5-noise"
-# TRAIN_TRACE_PATH="../data/exponential_traces/train"
-# VAL_TRACE_PATH="../data/exponential_traces/val"
-# TEST_TRACE_PATH="../data/exponential_traces/test"
-# TRAIN_TRACE_PATH="../data/step_traces/train"
-# VAL_TRACE_PATH="../data/step_traces/val"
-# TEST_TRACE_PATH="../data/step_traces/test"
-# TRAIN_TRACE_PATH="../data/step_traces_period20/train"
-# VAL_TRACE_PATH="../data/step_traces_period20/val"
-# TEST_TRACE_PATH="../data/step_traces_period20/test"
-# TRAIN_TRACE_PATH="../data/step_traces_period40_changing_peak/train"
-# VAL_TRACE_PATH="../data/step_traces_period40_changing_peak/val"
-# TEST_TRACE_PATH="../data/step_traces_period40_changing_peak/test"
-# TRAIN_TRACE_PATH="../data/step_traces_period50/train"
-# VAL_TRACE_PATH="../data/step_traces_period50/val"
-# TEST_TRACE_PATH="../data/step_traces_period50/test"
-# TRAIN_TRACE_PATH="../data/constant_trace/train"
-# VAL_TRACE_PATH="../data/constant_trace/val"
-# TEST_TRACE_PATH="../data/constant_trace/test"
+TEST_TRACE_PATH="../data/one-trace"
+
+TRAIN_TRACE_PATH_1="../data/Norway-DR-exp/train-2.1-noise"
+VAL_TRACE_PATH_1="../data/Norway-DR-exp/val-2.1-noise"
+
+TRAIN_TRACE_PATH_2="../data/Norway-DR-exp/train-2.2-noise"
+VAL_TRACE_PATH_2="../data/Norway-DR-exp/val-2.2-noise"
+
+#TRAIN_TRACE_PATH_3="../data/Norway-DR-exp/train-2.3-noise"
+#VAL_TRACE_PATH_3="../data/Norway-DR-exp/val-2.3-noise"
+#
+#TRAIN_TRACE_PATH_4="../data/Norway-DR-exp/train-2.4-noise"
+#VAL_TRACE_PATH_4="../data/Norway-DR-exp/val-2.4-noise"
+
 SIMULATOR_DIR="../sim"
 
 
-LOG_FILES=( '0' '1' '2' '3' )
 
-for NOISE in 0 ; do
-    # SUMMARY_DIR="../results/noise_exp/noise_${NOISE}"
-    SUMMARY_DIR="../results/Norway-DR-train/multiply-1-2.5-train/noise_${NOISE}"
-    # SUMMARY_DIR="../results/exponential_traces/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/step_traces_period20/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/step_traces_period40_changing_peak/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/step_traces_period50/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/constant_trace/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/eval_train_e2e/results_noise_${NOISE}_duration_${DURATION}"
-    # SUMMARY_DIR="../results/eval_train_e2e_new/results_noise_${NOISE}_duration_${DURATION}"
-    python ${SIMULATOR_DIR}/multi_agent.py \
-        --train_trace_dir ${TRAIN_TRACE_PATH} \
-        --val_trace_dir ${VAL_TRACE_PATH} \
-        --test_trace_dir ${TEST_TRACE_PATH} \
-        --summary_dir ${SUMMARY_DIR} \
-        --noise ${NOISE} \
-        --duration ${DURATION}
-done
+SUMMARY_DIR_1="../results/Norway-DR-train/multiply-1-2.1-train"
+python ${SIMULATOR_DIR}/multi_agent.py \
+    --train_trace_dir ${TRAIN_TRACE_PATH_1} \
+    --val_trace_dir ${VAL_TRACE_PATH_1} \
+    --test_trace_dir ${TEST_TRACE_PATH} \
+    --summary_dir ${SUMMARY_DIR_1} \
+    --noise ${NOISE} \
+    --duration ${DURATION}
+
+
+SUMMARY_DIR_2="../results/Norway-DR-train/multiply-1-2.1-train"
+python ${SIMULATOR_DIR}/multi_agent.py \
+    --train_trace_dir ${TRAIN_TRACE_PATH_2} \
+    --val_trace_dir ${VAL_TRACE_PATH_2} \
+    --test_trace_dir ${TEST_TRACE_PATH} \
+    --summary_dir ${SUMMARY_DIR_2} \
+    --noise ${NOISE} \
+    --duration ${DURATION}

@@ -93,7 +93,7 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
 
     video_count = 0
 
-    while True:  # serve video forever
+    for epoch in range( args.TOTAL_EPOCH ):  # serve video forever
         # the action is from the last decision
         # this is to make the framework similar to the real
         delay, sleep_time, buffer_size, rebuf, \
@@ -232,7 +232,6 @@ def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise, dur
     return rewards_mean
 
 
-# , train_trace_dir, val_trace_dir, test_trace_dir, noise, duration):
 def central_agent(args, net_params_queues, exp_queues):
     # Visdom Logs
     testing_epochs = []
@@ -294,7 +293,7 @@ def central_agent(args, net_params_queues, exp_queues):
         max_avg_reward = None
         max_train_reward = None
 
-        while True:
+        for epoch in range( args.TOTAL_EPOCH ):
             start_t = time.time()
             # synchronize the network parameters of work agent
             actor_net_params = actor.get_network_params()
@@ -406,7 +405,7 @@ def central_agent(args, net_params_queues, exp_queues):
                              marker={'color': PLOT_COLOR,
                                      'symbol': 104, 'size': "5"},
                              text=["one", "two", "three"], name='1st Trace')
-                layout = dict(title="Pensieve_Testing_Reward " + suffix,
+                layout = dict(title="Pensieve_Val_Reward " + suffix,
                               xaxis={'title': 'Epoch'},
                               yaxis={'title': 'Mean Reward'})
                 vis._send(
@@ -485,7 +484,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
 
         time_stamp = 0
         epoch = 0
-        while True:  # experience video streaming forever
+        for epoch in range( args.TOTAL_EPOCH ):            # experience video streaming forever
 
             # the action is from the last decision
             # this is to make the framework similar to the real

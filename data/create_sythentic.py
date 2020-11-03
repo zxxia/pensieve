@@ -2,9 +2,14 @@ import os
 import numpy as np
 
 
-INPUT_PATH = "./Norway-DR-exp/val"
-OUTPUT_PATH = "./Norway-DR-exp/val-2.5-noise"
-os.makedirs(OUTPUT_PATH, exist_ok=True)
+INPUT_TRAIN_PATH = "./Norway-DR-exp/train"
+OUTPUT_TRAIN_PATH = "./Norway-DR-exp/train-2.4-noise"
+INPUT_VAL_PATH = "./Norway-DR-exp/val"
+OUTPUT_VAL_PATH = "./Norway-DR-exp/val-2.4-noise"
+
+os.makedirs(OUTPUT_TRAIN_PATH, exist_ok=True)
+os.makedirs(OUTPUT_VAL_PATH, exist_ok=True)
+
 
 def rewrite_traces(input_trace_dir, output_trace_dir):
     np.random.seed(41)
@@ -16,7 +21,7 @@ def rewrite_traces(input_trace_dir, output_trace_dir):
         with open( file_input_path, 'r' ) as fr, open( file_output_path, 'w' ) as fw:
             for line in fr:
                 ts, bw = line.split()
-                noise = np.random.uniform( -1, 2.5, 1 )
+                noise = np.random.uniform( -1, 2.4, 1 )
                 new_bw = line.replace( bw, str(float(bw) * float(1 + noise)) )
                 fw.write(new_bw)
 
@@ -25,7 +30,9 @@ def rewrite_traces(input_trace_dir, output_trace_dir):
 
 def main():
     # rewrite trace_dir with uniform.noise adding
-    rewrite_traces(INPUT_PATH, OUTPUT_PATH)
+    rewrite_traces(INPUT_TRAIN_PATH, OUTPUT_TRAIN_PATH)
+    rewrite_traces(INPUT_VAL_PATH, OUTPUT_VAL_PATH)
+
 
 
 
