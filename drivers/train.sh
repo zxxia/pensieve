@@ -5,9 +5,9 @@ set -e
 
 NOISE=0
 DURATION=1
-TRAIN_TRACE_PATH="../data/Norway+LVC-DR/train"
-VAL_TRACE_PATH="../data/Norway+LVC-DR/val"
-TEST_TRACE_PATH="../data/Norway+LVC-DR/val"
+TRAIN_TRACE_PATH="../data/Norway-DR-exp/train-2.5-noise"
+VAL_TRACE_PATH="../data/Norway-DR-exp/val-2.5-noise"
+TEST_TRACE_PATH="../data/Norway-DR-exp/val-2.5-noise"
 # TRAIN_TRACE_PATH="../data/exponential_traces/train"
 # VAL_TRACE_PATH="../data/exponential_traces/val"
 # TEST_TRACE_PATH="../data/exponential_traces/test"
@@ -33,7 +33,7 @@ LOG_FILES=( '0' '1' '2' '3' )
 
 for NOISE in 0 ; do
     # SUMMARY_DIR="../results/noise_exp/noise_${NOISE}"
-    SUMMARY_DIR="../results/Norway+LVC-DR-train/multiply-1-3.5-train/noise_${NOISE}"
+    SUMMARY_DIR="../results/Norway-DR-train/multiply-1-2.5-train/noise_${NOISE}"
     # SUMMARY_DIR="../results/exponential_traces/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period20/results_noise_${NOISE}_duration_${DURATION}"
     # SUMMARY_DIR="../results/step_traces_period40_changing_peak/results_noise_${NOISE}_duration_${DURATION}"
