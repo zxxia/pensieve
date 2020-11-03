@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--RAND_RANGE', type=int, default='1000', help='')
 
     parser.add_argument('--TOTAL_EPOCH', type=int,
-                        default='35000', help='total training epoch')
+                        default='40000', help='total training epoch')
 
     parser.add_argument('--CHUNK_TIL_VIDEO_END_CAP',
                         type=float, default='48.0', help='')

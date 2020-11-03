@@ -16,26 +16,29 @@ SIMULATOR_DIR="../sim"
 
 
 # LOG_FILES=( 'pretrain' 'duration' 'duration_half' 'duration_quarter' 'duration_double' )
-#LOG_FILES=( '0' '1' '2' '3')
+LOG_FILES=( '35000' '34600' '33000' '32100' '29700' '28400' '27700')
 
 
-#NN_MODELS="../data/model_saved/nn_model_ep_36800.ckpt" #noise=0.03
-#NN_MODELS="../data/model_saved/Norway-DR/multiply-noise/nn_model_ep_25100.ckpt"
-#NN_MODELS="../results/FCC-DR/noise_0/nn_model_ep_27300.ckpt"
-#NN_MODELS="../results/LVC-DR-train/multiply-1-2-train/noise_0/nn_model_ep_18800.ckpt"
-NN_MODELS="../results/Norway+LVC-DR-train/multiply-1-3-train/model_saved/nn_model_ep_20900.ckpt"
+
+NN_MODELS=("../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_35000.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_34600.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_33000.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_32100.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_29700.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_28400.ckpt"
+          "../results/Norway-DR-train/multiply-1-2.2-train/model_saved/nn_model_ep_27700.ckpt")
 #RANDOM_SEED=41
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-test/Norway+LVC-multiply-1-3-20900/seed_${RANDOM_SEED}"
+      SUMMARY_DIR="../results/DR-test/Norway-multiply-1-2.2"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
-        #for ((i=0;i<${#NN_MODELS[@]};++i)); do
+        for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
                    --test_trace_dir ${TRACE_PATH} \
-                   --summary_dir ${SUMMARY_DIR}\
+                   --summary_dir ${SUMMARY_DIR}/model_${LOG_FILES[i]}/seed_1\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
                    --ROBUST_NOISE=0 \
@@ -60,7 +63,7 @@ NN_MODELS="../results/Norway+LVC-DR-train/multiply-1-3-train/model_saved/nn_mode
 #                 --SAMPLE_LENGTH=0 \
 #                 --NUMBER_PICK=0 \
 #                 --duration ${DURATION}
-
+          done
 
     done
 
