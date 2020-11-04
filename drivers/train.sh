@@ -7,8 +7,8 @@ NOISE=0
 DURATION=1
 TEST_TRACE_PATH="../data/one-trace"
 
-TRAIN_TRACE_PATH_1="../data/LVC-DR-exp/LVC-train"
-VAL_TRACE_PATH_1="../data/LVC-DR-exp/LVC-val"
+TRAIN_TRACE_PATH_1="../data/Norway-DR-exp/train-2.2-noise"
+VAL_TRACE_PATH_1="../data/Norway-DR-exp/val-2.2-noise"
 
 #TRAIN_TRACE_PATH_2="../data/Norway-DR-exp/train-2.2-noise"
 #VAL_TRACE_PATH_2="../data/Norway-DR-exp/val-2.2-noise"
@@ -23,7 +23,7 @@ SIMULATOR_DIR="../sim"
 
 
 
-SUMMARY_DIR_1="../results/LVC-DR-train/no-noise"
+SUMMARY_DIR_1="../results/Norway-DR-train/multiply-uniform-2.2-train"
 python ${SIMULATOR_DIR}/multi_agent.py \
     --train_trace_dir ${TRAIN_TRACE_PATH_1} \
     --val_trace_dir ${VAL_TRACE_PATH_1} \
