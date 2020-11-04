@@ -4,7 +4,7 @@
 set -e
 
 DURATION=1
-TRACE_PATH="../data/Norway-DR-exp/test"
+TRACE_PATH="../data/LVC-DR-exp/LVC-val"
 # TRACE_PATH="../sim/train_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
@@ -21,7 +21,7 @@ LOG_FILES=( '1')
 
 
 
-NN_MODELS=("../results/Norway-DR-train/no-noise-retrain/model_saved/nn_model_ep_36700.ckpt")
+NN_MODELS=("../results/Norway-DR-train/multiply-norm-0.5-0.5-train/model_saved/nn_model_ep_34600.ckpt")
 #NN_MODELS=(
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_31000.ckpt"
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_32200.ckpt"
@@ -37,14 +37,14 @@ NN_MODELS=("../results/Norway-DR-train/no-noise-retrain/model_saved/nn_model_ep_
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-test/Norway-no-train-mpc"
+      SUMMARY_DIR="../results/DR-new-test/Norway-norm-0.5-0.5-LVC-test"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
         for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
                    --test_trace_dir ${TRACE_PATH} \
-                   --summary_dir ${SUMMARY_DIR}/model_${LOG_FILES[i]}/seed_1\
+                   --summary_dir ${SUMMARY_DIR}/seed_1\
                    --model_path ${NN_MODELS[i]} \
                    --random_seed ${RANDOM_SEED} \
                    --ROBUST_NOISE=0 \
@@ -61,14 +61,14 @@ NN_MODELS=("../results/Norway-DR-train/no-noise-retrain/model_saved/nn_model_ep_
 #                 --NUMBER_PICK=253 \
 #                 --duration ${DURATION} &
 
-            python ${SIMULATOR_DIR}/mpc.py \
-                 --test_trace_dir ${TRACE_PATH} \
-                   --summary_dir ${SUMMARY_DIR}/model_${LOG_FILES[i]}/seed_1\
-                 --random_seed ${RANDOM_SEED}  \
-                 --ROBUST_NOISE=0 \
-                 --SAMPLE_LENGTH=0 \
-                 --NUMBER_PICK=0 \
-                 --duration ${DURATION}
+#            python ${SIMULATOR_DIR}/mpc.py \
+#                 --test_trace_dir ${TRACE_PATH} \
+#                   --summary_dir ${SUMMARY_DIR}/seed_1\
+#                 --random_seed ${RANDOM_SEED}  \
+#                 --ROBUST_NOISE=0 \
+#                 --SAMPLE_LENGTH=0 \
+#                 --NUMBER_PICK=0 \
+#                 --duration ${DURATION}
           done
 
     done
