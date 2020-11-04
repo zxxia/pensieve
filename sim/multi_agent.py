@@ -433,11 +433,8 @@ def central_agent(args, net_params_queues, exp_queues):
                     args, epoch, actor, val_log_file, args.val_trace_dir,
                     os.path.join(args.summary_dir, 'test_results'),
                     args.noise, args.duration)
-                avg_train_reward = np.sum(avg_reward)
 
-                if max_avg_reward is None or (avg_val_reward > max_avg_reward) \
-                        or (avg_train_reward > max_train_reward):
-                    max_train_reward = avg_train_reward
+                if max_avg_reward is None or avg_val_reward > max_avg_reward:
                     max_avg_reward = avg_val_reward
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
