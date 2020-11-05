@@ -3,9 +3,9 @@ import numpy as np
 
 
 INPUT_TRAIN_PATH = "./Norway-DR-exp/train"
-OUTPUT_TRAIN_PATH = "./Norway-DR-exp/train-norm-0.7-0.5-noise"
+OUTPUT_TRAIN_PATH = "./Norway-DR-exp/train-1-noise"
 INPUT_VAL_PATH = "./Norway-DR-exp/val"
-OUTPUT_VAL_PATH = "./Norway-DR-exp/val-norm-0.7-0.5-noise"
+OUTPUT_VAL_PATH = "./Norway-DR-exp/val-1-noise"
 
 os.makedirs(OUTPUT_TRAIN_PATH, exist_ok=True)
 os.makedirs(OUTPUT_VAL_PATH, exist_ok=True)
@@ -21,8 +21,8 @@ def rewrite_traces(input_trace_dir, output_trace_dir):
         with open( file_input_path, 'r' ) as fr, open( file_output_path, 'w' ) as fw:
             for line in fr:
                 ts, bw = line.split()
-                #noise = np.random.uniform( -1, 3.0, 1 )
-                noise = np.random.normal(0.7, 0.5, 1)
+                noise = np.random.uniform( -1, 1.0, 1 )
+                #noise = np.random.normal(0.6, 0.5, 1)
                 delta = 1 + noise
                 if delta < 0:
                     delta = 0.1

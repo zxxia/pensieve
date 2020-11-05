@@ -21,7 +21,7 @@ LOG_FILES=( '1')
 
 
 
-NN_MODELS=("../results/Norway-DR-train/multiply-uniform-2.4-train/model_saved/nn_model_ep_29300.ckpt")
+NN_MODELS=("../results/Norway-DR-train/multiply-norm-1-0.5-train/model_saved/nn_model_ep_35700.ckpt")
 #NN_MODELS=(
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_31000.ckpt"
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_32200.ckpt"
@@ -37,7 +37,7 @@ NN_MODELS=("../results/Norway-DR-train/multiply-uniform-2.4-train/model_saved/nn
 
 
     for RANDOM_SEED in 1; do
-      SUMMARY_DIR="../results/DR-new-test/Norway-uniform-2.4-LVC-test"
+      SUMMARY_DIR="../results/DR-new-test/Norway-norm-1-0.5-LVC-test"
       #     SUMMARY_DIR="../results/noise_${NOISE}"
       #     SUMMARY_DIR="../results/noise_exp/noise_${NOISE}_train"
 
