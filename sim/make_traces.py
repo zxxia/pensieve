@@ -75,11 +75,13 @@ for i in range(0, 600):
     T_l = random.uniform(T_l_min, T_l_max)
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
+    max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
         "--min-throughput {} --output_file {}".format(
                 T_s, T_l, cov, duration, STEPS, switch_parameter,
-                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
+                max_throughput, min_throughput, name)
     cmds.append(cmd.split(" "))
 
 for i in range(600, 800):
@@ -89,11 +91,13 @@ for i in range(600, 800):
     T_l = random.uniform(T_l_min, T_l_max)
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
+    max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput{} " \
+        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
         "--min-throughput {} --output_file {}".format(
                 T_s, T_l, cov, duration, STEPS, switch_parameter,
-                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
+                max_throughput, min_throughput, name)
     cmds.append(cmd.split(" "))
 
 for i in range(800, 1000):
@@ -103,11 +107,13 @@ for i in range(800, 1000):
     T_l = random.uniform(T_l_min, T_l_max)
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
+    max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput{} " \
+        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
         "--min-throughput {} --output_file {}".format(
                 T_s, T_l, cov, duration, STEPS, switch_parameter,
-                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
+                max_throughput, min_throughput, name)
     cmds.append(cmd.split(' '))
 
 
