@@ -3,6 +3,8 @@ import random
 import subprocess
 import sys
 
+from sympy import N, Symbol, solve
+
 # 68 files with 2000 seconds, 205 files with 320 seconds
 
 TRAIN_TRACE_DIR = "../data/synthetic_traces/train_large_range"
@@ -54,8 +56,18 @@ duration_max = 3000
 
 # generate 66 files, each 2000 seconds for training
 MAX_TASK_CNT = 32
+MIN_THROUGHPUT = 0.2
+MAX_THROUGHPUT = 4.3
+STEPS = 10
+
 cmds = []
 processes = []
+eq = -1
+x = Symbol("x", positive=True)
+for y in range(1, STEPS-1):
+    eq += (1/x**y)
+res = solve(eq, x)
+switch_parameter = N(res[0])
 for i in range(0, 600):
     name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
     print("create ", name)
@@ -64,7 +76,10 @@ for i in range(0, 600):
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --output_file {}".format(T_s, T_l, cov, duration, name)
+        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+        "--min-throughput {} --output_file {}".format(
+                T_s, T_l, cov, duration, STEPS, switch_parameter,
+                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
     cmds.append(cmd.split(" "))
 
 for i in range(600, 800):
@@ -75,7 +90,10 @@ for i in range(600, 800):
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --output_file {}".format(T_s, T_l, cov, duration, name)
+        "--duration {} --steps {} --switch-parameter {} --max-throughput{} " \
+        "--min-throughput {} --output_file {}".format(
+                T_s, T_l, cov, duration, STEPS, switch_parameter,
+                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
     cmds.append(cmd.split(" "))
 
 for i in range(800, 1000):
@@ -86,7 +104,10 @@ for i in range(800, 1000):
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --output_file {}".format(T_s, T_l, cov, duration, name)
+        "--duration {} --steps {} --switch-parameter {} --max-throughput{} " \
+        "--min-throughput {} --output_file {}".format(
+                T_s, T_l, cov, duration, STEPS, switch_parameter,
+                MAX_THROUGHPUT, MIN_THROUGHPUT, name)
     cmds.append(cmd.split(' '))
 
 

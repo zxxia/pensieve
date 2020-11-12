@@ -5,11 +5,6 @@ import random
 import time as time_module
 
 import numpy as np
-from sympy import Symbol, solve, N
-
-# MIN_BITRATE = 0.2
-# MAX_BITRATE = 4.3
-# STEPS = 10
 
 
 def parse_args():
@@ -17,13 +12,18 @@ def parse_args():
     Parse arguments from the command line.
     '''
     parser = argparse.ArgumentParser("Generate synthetic data.")
-    parser.add_argument("--T_l", type=float, required=True, help='')
-    parser.add_argument("--T_s", type=float, required=True, help='')
-    parser.add_argument("--cov", type=float, required=True, help='')
+    parser.add_argument("--T_l", type=float, required=True,
+                        help='control the prob_stay')
+    parser.add_argument("--T_s", type=float, required=True,
+                        help='control how long to recompute noise')
+    parser.add_argument("--cov", type=float, required=True,
+                        help='coefficient used to compute vairance of a state')
     parser.add_argument("--duration", type=float, required=True,
                         help='duration of each synthetic trace in seconds.')
     parser.add_argument("--steps", type=int, default=10,
                         help='number of steps')
+    parser.add_argument("--switch-parameter", type=float, required=True,
+                        help='switch parameter solved by polynomial solver')
     parser.add_argument("--max-throughput", type=float, default=4.3,
                         help='upper bound of throughput(Mbps)')
     parser.add_argument("--min-throughput", type=float, default=0.2,
@@ -99,7 +99,7 @@ def main():
     # get bitrate levels (in Mbps)
     bitrate_states_low_var = []
     curr = args.min_throughput
-    for x in range(0, args.steps):
+    for _ in range(0, args.steps):
         bitrate_states_low_var.append(curr)
         curr += ((args.max_throughput - args.min_throughput)/(args.steps - 1))
 
@@ -107,20 +107,8 @@ def main():
     transition_probs = []
     # assume you can go steps-1 states away (we will normalize this to the
     # actual scenario)
-    eq = -1
-    start = time_module.time()
-    x = Symbol("x", positive=True)
-    for y in range(1, args.steps-1):
-        eq += (1/x**y)
-    # res = solve(x**2-1, x)
-    res = solve(eq, x)
-    print('sovling used {}s'.format(time_module.time()-start))
-    switch_parameter = N(res[0])
-    print(switch_parameter)
-    # import ipdb; ipdb.set_trace()
     for z in range(1, args.steps-1):
-        transition_probs.append(1/(switch_parameter**z))
-    print(np.sum(transition_probs))
+        transition_probs.append(1/(args.switch_parameter**z))
     # two variance levels
     # sigma_low = 1.0
     # sigma_high = 1.0
@@ -154,7 +142,7 @@ def main():
         current_state = next_val
         current_variance = cov * bitrate_states_low_var[current_state]
         time += 1
-    print('e2e running used {}s'.format(time_module.time()-start))
+    # print('e2e running used {}s'.format(time_module.time()-start))
 
 
 if __name__ == "__main__":
