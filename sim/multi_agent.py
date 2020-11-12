@@ -58,6 +58,22 @@ DURATION = 1
 def entropy_weight_decay_func(epoch):
     # linear decay
     return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
+    # return 0.5
+
+
+# def entropy_weight_decay_func(epoch):
+#     # linear decay
+#     return np.maximum((1-0.1)/(10**5) * epoch + 1, 0.1)
+
+
+def learning_rate_decay_func(epoch):
+    # linear decay
+    if epoch < 30000:
+        return 0.0001
+    elif epoch < 60000:
+        return 0.00005
+    else:
+        return 0.00001
 
 
 def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
@@ -149,11 +165,11 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
 
         action_prob = actor.predict(np.reshape(
             state, (1, args.S_INFO, args.S_LEN)))
-        action_cumsum = np.cumsum(action_prob)
-        bit_rate = (action_cumsum > np.random.randint(
-            1, args.RAND_RANGE) / float(args.RAND_RANGE)).argmax()
+        # action_cumsum = np.cumsum(action_prob)
+        # bit_rate = (action_cumsum > np.random.randint(
+        #     1, args.RAND_RANGE) / float(args.RAND_RANGE)).argmax()
         # TODO: Zhengxu: Why compute bitrate this way?
-        # bit_rate = action_prob.argmax()
+        bit_rate = action_prob.argmax()
         # Note: we need to discretize the probability into 1/args.RAND_RANGE steps,
         # because there is an intrinsic discrepancy in passing single state and batch states
 
@@ -271,8 +287,8 @@ def central_agent(args, net_params_queues, exp_queues):
 
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[args.S_INFO,
-                                            args.S_LEN], action_dim=args.A_DIM,
-                                 learning_rate=args.ACTOR_LR_RATE)
+                                            args.S_LEN], action_dim=args.A_DIM,)
+                                 # learning_rate=args.ACTOR_LR_RATE)
         critic = a3c.CriticNetwork(sess,
                                    state_dim=[args.S_INFO, args.S_LEN],
                                    learning_rate=args.CRITIC_LR_RATE)
@@ -323,6 +339,7 @@ def central_agent(args, net_params_queues, exp_queues):
 
             # linear entropy weight decay(paper sec4.4)
             entropy_weight = entropy_weight_decay_func(epoch)
+            current_learning_rate = learning_rate_decay_func(epoch)
 
             for i in range(args.NUM_AGENTS):
                 s_batch, a_batch, r_batch, terminal, info = exp_queues[i].get()
@@ -356,7 +373,7 @@ def central_agent(args, net_params_queues, exp_queues):
             # actor.apply_gradients(assembled_actor_gradient)
             # critic.apply_gradients(assembled_critic_gradient)
             for i in range(len(actor_gradient_batch)):
-                actor.apply_gradients(actor_gradient_batch[i])
+                actor.apply_gradients(actor_gradient_batch[i], current_learning_rate)
                 critic.apply_gradients(critic_gradient_batch[i])
 
             # log training information
@@ -456,10 +473,14 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
 
     with tf.Session() as sess, open(os.path.join(
             args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
+
+        log_file.write('\t'.join(['time_stamp', 'bit_rate', 'buffer_size',
+                       'rebuffer', 'video_chunk_size', 'delay', 'reward',
+                       'epoch', 'trace_idx', 'mahimahi_ptr'])+'\n')
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[args.S_INFO,
-                                            args.S_LEN], action_dim=args.A_DIM,
-                                 learning_rate=args.ACTOR_LR_RATE)
+                                            args.S_LEN], action_dim=args.A_DIM,)
+                                 # learning_rate=args.ACTOR_LR_RATE)
         critic = a3c.CriticNetwork(sess,
                                    state_dim=[args.S_INFO, args.S_LEN],
                                    learning_rate=args.CRITIC_LR_RATE)
@@ -595,6 +616,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
 
                 s_batch.append(np.zeros((args.S_INFO, args.S_LEN)))
                 a_batch.append(action_vec)
+                epoch += 1
 
             else:
                 s_batch.append(state)

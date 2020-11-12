@@ -10,12 +10,17 @@ def load_traces(trace_dir):
     all_bw = []
     all_file_names = []
     for trace_file in trace_files:
+        # if trace_file in ["ferry.nesoddtangen-oslo-report.2011-02-01_1000CET.log", "trace_32551_http---www.amazon.com", "trace_5294_http---www.youtube.com", "trace_5642_http---www.youtube.com"]:
+        #     continue
         file_path = os.path.join(trace_dir, trace_file)
         ts_list = []
         bw_list = []
         with open(file_path, 'r') as f:
             for line in f:
-                ts, bw = line.split()
+                if len(line.split()) > 2:
+                    ts, bw, _ = line.split()
+                else:
+                    ts, bw = line.split()
                 ts = float(ts)
                 bw = float(bw)
                 ts_list.append(ts)

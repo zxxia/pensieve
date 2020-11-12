@@ -15,11 +15,12 @@ class ActorNetwork(object):
     Input to the network is the state, output is the distribution
     of all actions.
     """
-    def __init__(self, sess, state_dim, action_dim, learning_rate):
+
+    def __init__(self, sess, state_dim, action_dim):
         self.sess = sess
         self.s_dim = state_dim
         self.a_dim = action_dim
-        self.lr_rate = learning_rate
+        # self.lr_rate = learning_rate
 
         # Create the actor network
         self.inputs, self.out = self.create_actor_network()
@@ -35,7 +36,8 @@ class ActorNetwork(object):
                 tf.placeholder(tf.float32, shape=param.get_shape()))
         self.set_network_params_op = []
         for idx, param in enumerate(self.input_network_params):
-            self.set_network_params_op.append(self.network_params[idx].assign(param))
+            self.set_network_params_op.append(
+                self.network_params[idx].assign(param))
 
         # Selected action, 0-1 vector
         self.acts = tf.placeholder(tf.float32, [None, self.a_dim])
@@ -44,19 +46,18 @@ class ActorNetwork(object):
         self.act_grad_weights = tf.placeholder(tf.float32, [None, 1])
 
         self.entropy_weight = tf.placeholder(tf.float32)
-        # Compute the objective (log action_vector and entropy)
-        # self.obj = tf.reduce_sum(tf.multiply(
-        #                tf.log(tf.reduce_sum(tf.multiply(self.out, self.acts),
-        #                                     reduction_indices=1, keep_dims=True)),
-        #                -self.act_grad_weights)) \
-        #            + ENTROPY_WEIGHT * tf.reduce_sum(tf.multiply(self.out,
-        #                                                    tf.log(self.out + ENTROPY_EPS)))
+        self.lr_rate = tf.placeholder(tf.float32)
+        # Compute the objective (log action_vector and entropy) self.obj =
+        # tf.reduce_sum(tf.multiply( tf.log(tf.reduce_sum(tf.multiply(self.out,
+        # self.acts), reduction_indices=1, keep_dims=True)),
+        # -self.act_grad_weights)) \ + ENTROPY_WEIGHT *
+        # tf.reduce_sum(tf.multiply(self.out, tf.log(self.out + ENTROPY_EPS)))
         self.obj = tf.reduce_sum(tf.multiply(
-                       tf.log(tf.reduce_sum(tf.multiply(self.out, self.acts),
-                                            reduction_indices=1, keep_dims=True)),
-                       -self.act_grad_weights)) \
-                   + self.entropy_weight * tf.reduce_sum(tf.multiply(self.out,
-                                                           tf.log(self.out + ENTROPY_EPS)))
+            tf.log(tf.reduce_sum(tf.multiply(self.out, self.acts),
+                                 reduction_indices=1, keep_dims=True)),
+            -self.act_grad_weights)) \
+            + self.entropy_weight * tf.reduce_sum(
+                tf.multiply(self.out, tf.log(self.out + ENTROPY_EPS)))
 
         # Combine the gradients here
         self.actor_gradients = tf.gradients(self.obj, self.network_params)
@@ -110,9 +111,9 @@ class ActorNetwork(object):
             self.entropy_weight: entropy_weight
         })
 
-    def apply_gradients(self, actor_gradients):
+    def apply_gradients(self, actor_gradients, learning_rate):
         return self.sess.run(self.optimize, feed_dict={
-            i: d for i, d in zip(self.actor_gradients, actor_gradients)
+            i: d for i, d in zip(self.actor_gradients+[self.lr_rate],  actor_gradients+[learning_rate])
         })
 
     def get_network_params(self):

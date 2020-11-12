@@ -70,7 +70,8 @@ def main():
     print(len(all_cooked_time[-1]))
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
-                              all_cooked_bw=all_cooked_bw, fixed=True)
+                              all_cooked_bw=all_cooked_bw,
+                              all_file_names=all_file_names, fixed=True)
 
     log_path = os.path.join(summary_dir, 'log_sim_rl_' +
                             all_file_names[net_env.trace_idx])
@@ -79,8 +80,7 @@ def main():
     with tf.Session() as sess:
 
         actor = a3c.ActorNetwork(sess,
-                                 state_dim=[S_INFO, S_LEN], action_dim=A_DIM,
-                                 learning_rate=ACTOR_LR_RATE)
+                                 state_dim=[S_INFO, S_LEN], action_dim=A_DIM)
 
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()  # save neural net parameters
