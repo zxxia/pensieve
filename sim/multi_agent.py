@@ -29,7 +29,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and
 # time), chunk_til_video_end
 MODEL_SAVE_INTERVAL = 100
-VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300]  # Kbps
+#VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300]  # Kbps
+# [0.3, 0.75, 1.2, 1.85, 2.85, 4.3, 7.2, 12, 20, 33]
+VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300, 7200, 12000, 20000, 33000]  # Kbps
+
 HD_REWARD = [1, 2, 3, 12, 15, 20]
 M_IN_K = 1000.0
 REBUF_PENALTY = 4.3  # 1 sec rebuffering -> 3 Mbps

@@ -2,7 +2,7 @@ import os
 
 
 TOTAL_VIDEO_CHUNCK = 49
-BITRATE_LEVELS = 6
+BITRATE_LEVELS = 10
 VIDEO_PATH = '../video_server/'
 VIDEO_FOLDER = 'video'
 

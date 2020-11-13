@@ -21,17 +21,21 @@ LOG_FILES=( '1')
 
 
 
-NN_MODELS="../results/synthetic-train/train-100/model_saved/nn_model_ep_24400.ckpt"
+# NN_MODELS="../results/synthetic-train/train-2000-trace-train100/model_saved/nn_model_ep_4400.ckpt"
+NN_MODELS="../results/synthetic-train/train-60/model_saved/nn_model_ep_27200.ckpt"
+
 #NN_MODELS=(
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_31000.ckpt"
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_32200.ckpt"
 #)
 #RANDOM_SEED=41
 
+TRACE_PATH="../data/synthetic_traces/test_0_10000/x"
+SUMMARY_DIR="../results/synthetic-test/test-on-0-10000/train-60/"
 
-for i_folder in 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100; do
-        TRACE_PATH="../data/synthetic-train/test_large_range/${i_folder}"
-        SUMMARY_DIR="../results/synthetic-test/large-range-test-real/train-100/test-on-${i_folder}"
+#for i_folder in 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100; do
+#        TRACE_PATH="../data/synthetic-train/test-all/testing_${i_folder}"
+#        SUMMARY_DIR="../results/synthetic-test/large-range-test/trace-2000-train-100/test-on-${i_folder}"
 
         #for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
@@ -63,4 +67,4 @@ for i_folder in 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100; do
 #                 --duration ${DURATION}
 #          #done
 
-done
+#done
