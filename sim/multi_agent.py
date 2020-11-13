@@ -68,12 +68,13 @@ def entropy_weight_decay_func(epoch):
 
 def learning_rate_decay_func(epoch):
     # linear decay
-    if epoch < 30000:
-        return 0.0001
-    elif epoch < 60000:
-        return 0.00005
-    else:
-        return 0.00001
+    return 0.0001
+    # if epoch < 30000:
+    #     return 0.0001
+    # elif epoch < 60000:
+    #     return 0.00005
+    # else:
+    #     return 0.00001
 
 
 def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
