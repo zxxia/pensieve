@@ -42,6 +42,24 @@ def check_args(args):
     assert args.throughput_range[0] <= args.throughput_range[1]
 
 
+def log_args(args):
+    """
+    Writes arguments to log. Assumes args.results_dir exists.
+    """
+    log_file = os.path.join(args.output_dir, 'log_args')
+    args_logging = logging.getLogger("args")
+    formatter = logging.Formatter('%(asctime)s : %(message)s')
+    file_handler = logging.FileHandler(log_file, mode='w')
+    file_handler.setFormatter(formatter)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+    args_logging.setLevel(logging.INFO)
+    args_logging.addHandler(file_handler)
+    args_logging.addHandler(stream_handler)
+    for arg in vars(args):
+        args_logging.info(arg + '\t' + str(getattr(args, arg)))
+
+
 def transition(state, variance, prob_stay, bitrate_states_low_var,
                transition_probs):
     # variance_switch_prob, sigma_low, sigma_high,
@@ -135,6 +153,7 @@ def generate_trace(T_s, T_l, cov, time_length, steps, max_throughput,
 def main():
     args = parse_args()
     check_args(args)
+    log_args(args)
     os.makedirs(args.output_dir, exist_ok=True)
     t_start = time.time()
     eq = -1
@@ -160,9 +179,9 @@ def main():
 
             generate_trace(T_s, T_l, cov, duration, args.steps, max_throughput,
                            min_throughput, switch_parameter, output_file)
-            csvwriter.writerow([output_file, T_s, T_l, cov, duration,
-                                args.steps, max_throughput, min_throughput,
-                                switch_parameter])
+            csvwriter.writerow([os.path.basename(output_file), T_s, T_l, cov,
+                                duration, args.steps, max_throughput,
+                                min_throughput, switch_parameter])
     print('e2e: {:.3f}s'.format(time.time()-t_start))
 
 
