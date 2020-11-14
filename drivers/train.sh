@@ -7,8 +7,8 @@ NOISE=0
 DURATION=1
 TEST_TRACE_PATH="../data/one-trace"
 
-TRAIN_TRACE_PATH_1="../data/synthetic-train/train_large_trace_100"
-VAL_TRACE_PATH_1="../data/synthetic-train/val_large_trace_100"
+TRAIN_TRACE_PATH_1="../data/synthetic-train/train_maxBW_5"
+VAL_TRACE_PATH_1="../data/synthetic-train/val_maxBW_5"
 
 #TRAIN_TRACE_PATH_2="../data/Norway-DR-exp/train-2.2-noise"
 #VAL_TRACE_PATH_2="../data/Norway-DR-exp/val-2.2-noise"
@@ -23,7 +23,7 @@ SIMULATOR_DIR="../sim"
 
 
 
-SUMMARY_DIR_1="../results/synthetic-train/bitrate-10-train-100"
+SUMMARY_DIR_1="../results/synthetic-train/bitrate-10-train-5"
 python ${SIMULATOR_DIR}/multi_agent.py \
     --A_DIM=10\
     --S_LEN=10\

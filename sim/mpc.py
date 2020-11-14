@@ -13,12 +13,13 @@ import numpy as np
 from utils.utils import adjust_n_random_traces, load_traces, adjust_traces_one_random
 
 S_INFO = 5  # bit_rate, buffer_size, rebuffering_time, bandwidth_measurement, chunk_til_video_end
-S_LEN = 8  # take how many frames in the past
-A_DIM = 6
+S_LEN = 10  # take how many frames in the past
+A_DIM = 10
 MPC_FUTURE_CHUNK_COUNT = 5
 ACTOR_LR_RATE = 0.0001
 CRITIC_LR_RATE = 0.001
-VIDEO_BIT_RATE = np.array([300, 750, 1200, 1850, 2850, 4300])  # Kbps
+#VIDEO_BIT_RATE = np.array([300, 750, 1200, 1850, 2850, 4300])  # Kbps
+VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300, 7200, 12000, 20000, 33000]  # Kbps
 BITRATE_REWARD = [1, 2, 3, 12, 15, 20]
 BUFFER_NORM_FACTOR = 10.0
 CHUNK_TIL_VIDEO_END_CAP = 48.0
