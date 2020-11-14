@@ -15,11 +15,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and time), chunk_til_video_end
 S_INFO = 6
-S_LEN = 8  # take how many frames in the past
-A_DIM = 6
+S_LEN = 10  # take how many frames in the past
+A_DIM = 10
 ACTOR_LR_RATE = 0.0001
 CRITIC_LR_RATE = 0.001
-VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300]  # Kbps
+#VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300]  # Kbps
+VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300, 7200, 12000, 20000, 33000]  # Kbps
+
 BUFFER_NORM_FACTOR = 10.0
 CHUNK_TIL_VIDEO_END_CAP = 48.0
 M_IN_K = 1000.0
