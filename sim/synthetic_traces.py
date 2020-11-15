@@ -131,7 +131,11 @@ def main():
             noise = np.random.normal(0, current_variance, 1)[0]
             cnt = T_s
         # TODO: the gaussian val is at least 0.1
-        gaus_val = max(0.1, bitrate_states_low_var[current_state] + noise)
+        final_bw = bitrate_states_low_var[current_state] + noise
+        if final_bw > args.max_throughput:
+            final_bw = args.max_throughput
+        gaus_val = max( 0.1 ,final_bw )
+        #gaus_val = max(0.1, bitrate_states_low_var[current_state] + noise)
         output_writer.writerow([time, gaus_val])
         cnt -= 1
         next_val = transition(current_state, current_variance, prob_stay,

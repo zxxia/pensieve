@@ -7,9 +7,9 @@ from sympy import N, Symbol, solve
 
 # 68 files with 2000 seconds, 205 files with 320 seconds
 
-TRAIN_TRACE_DIR = "../data/synthetic_Ts_train/train_Ts_2"
+TRAIN_TRACE_DIR = "../data/synthetic_Ts_train/train_Ts_100"
 #TEST_TRACE_DIR = "../data/synthetic_train/train_Ts_test"
-VAL_TRACE_DIR = "../data/synthetic_Ts_train/val_Ts_2"
+VAL_TRACE_DIR = "../data/synthetic_Ts_train/val_Ts_100"
 
 os.makedirs(TRAIN_TRACE_DIR, exist_ok=True)
 os.makedirs(VAL_TRACE_DIR, exist_ok=True)
@@ -46,7 +46,7 @@ os.makedirs(VAL_TRACE_DIR, exist_ok=True)
 
 # large range
 T_s_min = 1
-T_s_max = 2
+T_s_max = 100
 T_l_min = 1
 T_l_max = 10
 cov_min = 0.01
@@ -57,8 +57,8 @@ duration_max = 3000
 # generate 66 files, each 2000 seconds for training
 MAX_TASK_CNT = 32
 MIN_THROUGHPUT = 0.2
-MAX_THROUGHPUT = 20
-STEPS = 10
+MAX_THROUGHPUT = 10
+STEPS = 20
 
 cmds = []
 processes = []
@@ -75,7 +75,9 @@ for i in range(0, 600):
     T_l = random.uniform(T_l_min, T_l_max)
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
-    max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+    #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+    # for T_s experiment:
+    max_throughput = MAX_THROUGHPUT
     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
@@ -91,7 +93,9 @@ for i in range(600, 800):
     T_l = random.uniform(T_l_min, T_l_max)
     cov = random.uniform(cov_min, cov_max)
     duration = random.uniform(duration_min, duration_max)
-    max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+    #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+    # for T_s experiment:
+    max_throughput = MAX_THROUGHPUT
     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
@@ -110,7 +114,10 @@ for i in range(600, 800):
 #         T_l = random.uniform(T_l_min, T_l_max)
 #         cov = random.uniform(cov_min, cov_max)
 #         duration = random.uniform(duration_min, duration_max)
-#         max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+#         max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+          #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+          # for T_s experiment:
+          #max_throughput = MAX_THROUGHPUT
 #         min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
 #         cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
 #             "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
