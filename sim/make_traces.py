@@ -110,7 +110,7 @@ for i in range(1200, 1300):
 #         T_s = random.uniform(T_s_min, T_s_max)
 #         cov = random.uniform(cov_min, cov_max)
 #         duration = random.uniform(duration_min, duration_max)
-#         max_throughput = random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT)
+#         max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
 #         min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
 #         cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
 #             "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
