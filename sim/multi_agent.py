@@ -65,9 +65,9 @@ def entropy_weight_decay_func(epoch):
         entropy = 1000.0
     if epoch < 10000:
         entropy = 2
-    if entropy < 20000:
+    if epoch < 20000:
         entropy = 1
-    if entropy < 50000:
+    if epoch < 50000:
         entropy = 0.5
     return entropy
 
