@@ -55,9 +55,22 @@ DURATION = 1
 # NN_MODEL = None
 
 
+# def entropy_weight_decay_func(epoch):
+#     # linear decay
+#     return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
+
 def entropy_weight_decay_func(epoch):
     # linear decay
-    return np.maximum(-0.05/(10**4) * epoch + 0.5, 0.1)
+    if epoch < 5000:
+        entropy = 1000.0
+    if epoch < 10000:
+        entropy = 2
+    if entropy < 20000:
+        entropy = 1
+    if entropy < 50000:
+        entropy = 0.5
+    return entropy
+
 
 
 def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
