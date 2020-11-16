@@ -23,7 +23,7 @@ SIMULATOR_DIR="../sim"
 
 
 
-SUMMARY_DIR_1="../results/synthetic-train/Ts-train/train_Ts_2"
+SUMMARY_DIR_1="../results/synthetic-train/Ts-train-new/train_Ts_2"
 python ${SIMULATOR_DIR}/multi_agent.py \
     --NUM_AGENTS=8 \
     --train_trace_dir ${TRAIN_TRACE_PATH_1} \
