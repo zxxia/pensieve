@@ -60,13 +60,13 @@ DURATION = 1
 
 def entropy_weight_decay_func(epoch):
     # linear decay
-    if epoch < 5000:
-        entropy = 1000.0
+    if epoch < 2000:
+        entropy = 2.0
     if epoch < 10000:
+        entropy = 1000
+    if epoch < 20000:
         entropy = 2
-    if entropy < 20000:
-        entropy = 1
-    if entropy < 50000:
+    else:
         entropy = 0.5
     return entropy
 
@@ -88,7 +88,8 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
     #     args.RANDOM_SEED, duration_factor=duration)
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
-                              all_cooked_bw=all_cooked_bw)
+                              all_cooked_bw=all_cooked_bw,
+                              random_seed=args.RANDOM_SEED)
 
     log_path = os.path.join(log_output_dir, 'log_sim_rl_{}'.format(
                             all_file_names[net_env.trace_idx]))

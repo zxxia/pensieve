@@ -18,7 +18,7 @@ VIDEO_SIZE_FILE = '../data/video_sizes/video_size_'
 
 
 class Environment:
-    def __init__(self, all_cooked_time, all_cooked_bw, random_seed=RANDOM_SEED, fixed=False):
+    def __init__(self, all_cooked_time, all_cooked_bw, random_seed, fixed=False):
         assert len(all_cooked_time) == len(all_cooked_bw)
 
         np.random.seed(random_seed)
