@@ -46,7 +46,7 @@ def log_args(args):
     """
     Writes arguments to log. Assumes args.results_dir exists.
     """
-    log_file = os.path.join(args.output_dir, 'log_args')
+    log_file = os.path.join(args.output_dir, '.log_args')
     args_logging = logging.getLogger("args")
     formatter = logging.Formatter('%(asctime)s : %(message)s')
     file_handler = logging.FileHandler(log_file, mode='w')
@@ -153,8 +153,8 @@ def generate_trace(T_s, T_l, cov, time_length, steps, max_throughput,
 def main():
     args = parse_args()
     check_args(args)
-    log_args(args)
     os.makedirs(args.output_dir, exist_ok=True)
+    log_args(args)
     t_start = time.time()
     eq = -1
     x = Symbol("x", positive=True)
@@ -163,7 +163,7 @@ def main():
     res = solve(eq, x)
     switch_parameter = N(res[0])
     print('solving polynomial: {:.3f}s'.format(time.time()-t_start))
-    with open(os.path.join(args.output_dir, "metadata.csv"), 'w', 1) as f:
+    with open(os.path.join(args.output_dir, ".metadata.csv"), 'w', 1) as f:
         csvwriter = csv.writer(f)
         csvwriter.writerow(['filename', 'T_s', 'T_l', "cov", 'duration',
                             'steps', 'max_throughput', 'min_throughput',

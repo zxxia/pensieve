@@ -1,3 +1,5 @@
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import csv
 import logging
 import multiprocessing as mp
@@ -7,14 +9,16 @@ import time
 import a3c
 import env
 import numpy as np
-import tensorflow as tf
 
 import visdom
 import src.config as config
 
 from utils.utils import adjust_traces, load_traces
 from datetime import datetime
-
+from tensorflow.python.util import deprecation
+deprecation._PRINT_DEPRECATION_WARNINGS = False
+from warnings import simplefilter
+simplefilter(action='ignore', category=FutureWarning)
 
 # Visdom Settings
 vis = visdom.Visdom()
@@ -37,22 +41,6 @@ SMOOTH_PENALTY = 1
 DEFAULT_QUALITY = 1  # default video quality without agent
 NOISE = 0
 DURATION = 1
-
-# SUMMARY_DIR = f'../results/Lesley_more_traces_for_pensieve/results_noise{NOISE}'
-# SUMMARY_DIR = f'../results/entropy_weight_exp/results_noise{NOISE}'
-# SUMMARY_DIR = f'../results/lr_exp/results_noise{NOISE}'
-# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
-# SUMMARY_DIR = '../results/results_duration_quarter'  # .format(DURATION)
-# SUMMARY_DIR = './results_noise-1'
-# TEST_LOG_FOLDER = os.path.join(SUMMARY_DIR, 'test_results')
-# TRAIN_TRACES = './cooked_traces/'  # original trace location
-# TRAIN_TRACES = './train_sim_traces'
-
-# TRAIN_TRACES = '../data/train'
-# VAL_TRACES = '../data/val/'
-# TEST_TRACES = '../data/test'
-# NN_MODEL = './results/pretrain_linear_reward.ckpt'
-# NN_MODEL = None
 
 
 def entropy_weight_decay_func(epoch):
@@ -219,7 +207,6 @@ def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise,
     # append test performance to the log
     rewards = []
     test_log_files = os.listdir(test_log_folder)
-    print(len(test_log_files))
     for test_log_file in test_log_files:
         reward = []
         with open(os.path.join(test_log_folder, test_log_file), 'r') as f:
@@ -399,6 +386,7 @@ def central_agent(args, net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
+                print('epoch', epoch - 1)
                 _ = testing(args, epoch, actor, train_e2e_log_file,
                             args.train_trace_dir,
                             os.path.join(args.summary_dir, 'test_results'),
@@ -461,7 +449,7 @@ def central_agent(args, net_params_queues, exp_queues):
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
-            print(f'epoch{epoch-1}: {end_t - start_t}s')
+            # print(f'epoch{epoch-1}: {end_t - start_t}s')
 
 
 def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,

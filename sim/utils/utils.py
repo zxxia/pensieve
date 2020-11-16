@@ -12,6 +12,8 @@ def load_traces(trace_dir):
     for trace_file in trace_files:
         # if trace_file in ["ferry.nesoddtangen-oslo-report.2011-02-01_1000CET.log", "trace_32551_http---www.amazon.com", "trace_5294_http---www.youtube.com", "trace_5642_http---www.youtube.com"]:
         #     continue
+        if trace_file.startswith("."):
+            continue
         file_path = os.path.join(trace_dir, trace_file)
         ts_list = []
         bw_list = []
