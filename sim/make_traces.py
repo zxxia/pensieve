@@ -48,7 +48,7 @@ os.makedirs(TEST_TRACE_DIR, exist_ok=True)
 T_s_min = 1
 T_s_max = 100
 T_l_min = 1
-T_l_max = 10
+T_l_max = 100
 cov_min = 0.01
 cov_max = 0.7
 duration_min = 1000
@@ -113,7 +113,8 @@ for i in range(800, 1000):
         print("create ", name)
         #T_s = random.uniform(T_s_min, T_s_max)
         T_s = T_s_max
-        T_l = random.uniform(T_l_min, T_l_max)
+        #T_l = random.uniform(T_l_min, T_l_max)
+        T_l = T_l_max
         cov = random.uniform(cov_min, cov_max)
         duration = random.uniform(duration_min, duration_max)
         #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
