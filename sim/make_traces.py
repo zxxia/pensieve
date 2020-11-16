@@ -7,13 +7,13 @@ from sympy import N, Symbol, solve
 
 # 68 files with 2000 seconds, 205 files with 320 seconds
 
-TRAIN_TRACE_DIR = "../data/synthetic_Ts_train/train_Ts_100"
-#TEST_TRACE_DIR = "../data/synthetic_train/train_Ts_test"
-VAL_TRACE_DIR = "../data/synthetic_Ts_train/val_Ts_100"
+# TRAIN_TRACE_DIR = "../data/synthetic_Ts_train/train_Ts_100"
+TEST_TRACE_DIR = "../data/synthetic_test/Ts_train_test"
+# VAL_TRACE_DIR = "../data/synthetic_Ts_train/val_Ts_100"
 
-os.makedirs(TRAIN_TRACE_DIR, exist_ok=True)
-os.makedirs(VAL_TRACE_DIR, exist_ok=True)
-#os.makedirs(TEST_TRACE_DIR, exist_ok=True)
+# os.makedirs(TRAIN_TRACE_DIR, exist_ok=True)
+# os.makedirs(VAL_TRACE_DIR, exist_ok=True)
+os.makedirs(TEST_TRACE_DIR, exist_ok=True)
 
 # T_s_min = 10
 # T_s_max = 100
@@ -46,7 +46,7 @@ os.makedirs(VAL_TRACE_DIR, exist_ok=True)
 
 # large range
 T_s_min = 1
-T_s_max = 100
+#T_s_max = 100
 T_l_min = 1
 T_l_max = 10
 cov_min = 0.01
@@ -68,63 +68,63 @@ for y in range(1, STEPS-1):
     eq += (1/x**y)
 res = solve(eq, x)
 switch_parameter = N(res[0])
-for i in range(0, 600):
-    name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
-    print("create ", name)
-    T_s = random.uniform(T_s_min, T_s_max)
-    T_l = random.uniform(T_l_min, T_l_max)
-    cov = random.uniform(cov_min, cov_max)
-    duration = random.uniform(duration_min, duration_max)
-    #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-    # for T_s experiment:
-    max_throughput = MAX_THROUGHPUT
-    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-    cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-        "--min-throughput {} --output_file {}".format(
-                T_l, T_s, cov, duration, STEPS, switch_parameter,
-                max_throughput, min_throughput, name)
-    cmds.append(cmd.split(" "))
+# for i in range(0, 600):
+#     name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
+#     print("create ", name)
+#     T_s = random.uniform(T_s_min, T_s_max)
+#     T_l = random.uniform(T_l_min, T_l_max)
+#     cov = random.uniform(cov_min, cov_max)
+#     duration = random.uniform(duration_min, duration_max)
+#     #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+#     # for T_s experiment:
+#     max_throughput = MAX_THROUGHPUT
+#     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+#     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+#         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+#         "--min-throughput {} --output_file {}".format(
+#                 T_l, T_s, cov, duration, STEPS, switch_parameter,
+#                 max_throughput, min_throughput, name)
+#     cmds.append(cmd.split(" "))
+#
+# for i in range(600, 800):
+#     name = os.path.join(VAL_TRACE_DIR, f"trace{i}.txt")
+#     print("create ", name)
+#     T_s = random.uniform(T_s_min, T_s_max)
+#     T_l = random.uniform(T_l_min, T_l_max)
+#     cov = random.uniform(cov_min, cov_max)
+#     duration = random.uniform(duration_min, duration_max)
+#     #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+#     # for T_s experiment:
+#     max_throughput = MAX_THROUGHPUT
+#     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+#     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+#         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+#         "--min-throughput {} --output_file {}".format(
+#                 T_l, T_s, cov, duration, STEPS, switch_parameter,
+#                 max_throughput, min_throughput, name)
+#     cmds.append(cmd.split(" "))
 
-for i in range(600, 800):
-    name = os.path.join(VAL_TRACE_DIR, f"trace{i}.txt")
-    print("create ", name)
-    T_s = random.uniform(T_s_min, T_s_max)
-    T_l = random.uniform(T_l_min, T_l_max)
-    cov = random.uniform(cov_min, cov_max)
-    duration = random.uniform(duration_min, duration_max)
-    #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-    # for T_s experiment:
-    max_throughput = MAX_THROUGHPUT
-    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-    cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-        "--min-throughput {} --output_file {}".format(
-                T_l, T_s, cov, duration, STEPS, switch_parameter,
-                max_throughput, min_throughput, name)
-    cmds.append(cmd.split(" "))
-
-# for x in range(0, 101, 10):
-#     T_s_max = x
-#     for i in range(800, 1800):
-#         os.makedirs(TEST_TRACE_DIR+"/"+str(x), exist_ok=True)
-#         name = os.path.join(TEST_TRACE_DIR+"/"+str(x), f"trace{i}.txt")
-#         print("create ", name)
-#         T_s = random.uniform(T_s_min, T_s_max)
-#         T_l = random.uniform(T_l_min, T_l_max)
-#         cov = random.uniform(cov_min, cov_max)
-#         duration = random.uniform(duration_min, duration_max)
-#         max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-          #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-          # for T_s experiment:
-          #max_throughput = MAX_THROUGHPUT
-#         min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-#         cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-#             "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-#             "--min-throughput {} --output_file {}".format(
-#                     T_l, T_s, cov, duration, STEPS, switch_parameter,
-#                     max_throughput, min_throughput, name)
-#         cmds.append(cmd.split(' '))
+#for x in range(10, 101, 10):
+T_s_max = 2
+x=2
+for i in range(800, 1000):
+        os.makedirs(TEST_TRACE_DIR+"/"+str(x), exist_ok=True)
+        name = os.path.join(TEST_TRACE_DIR+"/"+str(x), f"trace{i}.txt")
+        print("create ", name)
+        T_s = random.uniform(T_s_min, T_s_max)
+        T_l = random.uniform(T_l_min, T_l_max)
+        cov = random.uniform(cov_min, cov_max)
+        duration = random.uniform(duration_min, duration_max)
+        #max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+        #for T_s experiment:
+        max_throughput = MAX_THROUGHPUT
+        min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+        cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+            "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+            "--min-throughput {} --output_file {}".format(
+                    T_l, T_s, cov, duration, STEPS, switch_parameter,
+                    max_throughput, min_throughput, name)
+        cmds.append(cmd.split(' '))
 
 
 while True:
