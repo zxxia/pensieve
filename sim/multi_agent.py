@@ -61,13 +61,13 @@ DURATION = 1
 
 def entropy_weight_decay_func(epoch):
     # linear decay
-    if epoch < 5000:
-        entropy = 1000.0
+    if epoch < 2000:
+        entropy = 2.0
     if epoch < 10000:
-        entropy = 2
+        entropy = 1000
     if epoch < 20000:
-        entropy = 1
-    if epoch < 50000:
+        entropy = 2
+    else:
         entropy = 0.5
     return entropy
 
