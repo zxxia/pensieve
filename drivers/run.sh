@@ -22,7 +22,7 @@ LOG_FILES=( '1')
 
 
 # NN_MODELS="../results/synthetic-train/train-2000-trace-train100/model_saved/nn_model_ep_4400.ckpt"
-NN_MODELS="../results/synthetic-train/bitrate-10-train-60/model_saved/nn_model_ep_3400.ckpt"
+NN_MODELS="../results/synthetic-train/maxBW-60-100/3-bitrate-10-train-60/model_saved/nn_model_ep_11900.ckpt"
 
 #NN_MODELS=(
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_31000.ckpt"
@@ -35,7 +35,7 @@ NN_MODELS="../results/synthetic-train/bitrate-10-train-60/model_saved/nn_model_e
 
 for i_folder in 5 10 20 30 40 50 60 70 80 90 100; do
         TRACE_PATH="../data/synthetic-test/test_more_bitrate/test_on_${i_folder}"
-        SUMMARY_DIR="../results/synthetic-test/more-bitrate-tmp/bitrate-10-train-60/test-on-${i_folder}"
+        SUMMARY_DIR="../results/synthetic-test/more-bitrate-tmp/bitrate-10-train-60-11900/test-on-${i_folder}"
 
         #for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \

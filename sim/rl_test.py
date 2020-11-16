@@ -28,7 +28,7 @@ M_IN_K = 1000.0
 REBUF_PENALTY = 4.3  # 1 sec rebuffering -> 3 Mbps
 SMOOTH_PENALTY = 1
 DEFAULT_QUALITY = 1  # default video quality without agent
-#RANDOM_SEED = 42
+RANDOM_SEED = 42
 RAND_RANGE = 1000
 # LOG_FILE = './test_results/log_sim_rl'
 # TEST_TRACES = './cooked_test_traces/'
@@ -90,7 +90,7 @@ def main():
     #print(len(all_cooked_time[-1]))
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
-                              all_cooked_bw=all_cooked_bw, fixed=True)
+                              all_cooked_bw=all_cooked_bw, random_seed=RANDOM_SEED,fixed=True)
 
     log_path = os.path.join(summary_dir, 'log_sim_rl_' +
                             all_file_names[net_env.trace_idx])
