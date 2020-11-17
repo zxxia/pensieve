@@ -1,3 +1,5 @@
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import argparse
 import os
 from utils.utils import adjust_traces, load_traces
@@ -5,7 +7,6 @@ import a3c
 # import fixed_env as env
 import env
 import numpy as np
-import tensorflow as tf
 
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
@@ -63,11 +64,10 @@ def main():
 
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_trace_dir)
-    print(len(all_cooked_time[-1]))
+    print("Loaded {} traces." .format(len(all_file_names)))
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw, bw_noise=args.noise,
         duration_factor=args.duration)
-    print(len(all_cooked_time[-1]))
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
@@ -88,7 +88,7 @@ def main():
         # restore neural net parameters
         if nn_model is not None:  # NN_MODEL is the path to file
             saver.restore(sess, nn_model)
-            print("Testing model restored.")
+            print("Testing model restored from {}.".format(nn_model))
 
         time_stamp = 0
 
@@ -189,6 +189,7 @@ def main():
                 entropy_record = []
 
                 video_count += 1
+                print("Processed {} traces".format(video_count))
 
                 if video_count >= len(all_file_names):
                     break
