@@ -23,10 +23,8 @@ SIMULATOR_DIR="../sim"
 
 
 
-SUMMARY_DIR_1="../results/synthetic-train/bitrate-10-train-5"
+SUMMARY_DIR_1="../results/synthetic-train/mpc-6-train/bitrate-6-train-5"
 python ${SIMULATOR_DIR}/multi_agent.py \
-    --A_DIM=10\
-    --S_LEN=10\
     --NUM_AGENTS=8\
     --train_trace_dir ${TRAIN_TRACE_PATH_1} \
     --val_trace_dir ${VAL_TRACE_PATH_1} \

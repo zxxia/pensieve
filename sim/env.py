@@ -5,7 +5,7 @@ B_IN_MB = 1000000.0
 BITS_IN_BYTE = 8.0
 RANDOM_SEED = 42
 VIDEO_CHUNCK_LEN = 4000.0  # millisec, every time add this amount to buffer
-BITRATE_LEVELS = 10
+BITRATE_LEVELS = 6
 TOTAL_VIDEO_CHUNCK = 48
 BUFFER_THRESH = 60.0 * MILLISECONDS_IN_SECOND  # millisec, max buffer limit
 DRAIN_BUFFER_SLEEP_TIME = 500.0  # millisec
@@ -14,7 +14,7 @@ LINK_RTT = 80  # millisec
 PACKET_SIZE = 1500  # bytes
 NOISE_LOW = 0.9
 NOISE_HIGH = 1.1
-VIDEO_SIZE_FILE = '../data/video_sizes/video_size_'
+VIDEO_SIZE_FILE = '../data/video_sizes_tmp/video_size_'
 
 
 class Environment:
