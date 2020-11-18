@@ -7,9 +7,9 @@ from sympy import N, Symbol, solve
 
 # 68 files with 2000 seconds, 205 files with 320 seconds
 
-TRAIN_TRACE_DIR = "../data/synthetic-train-60-100/train_maxBW_100"
+TRAIN_TRACE_DIR = "../data/synthetic-train/train_maxBW_2"
 # TEST_TRACE_DIR = "../data/synthetic-test/test_more_bitrate_1000"
-VAL_TRACE_DIR = "../data/synthetic-train-60-100/val_maxBW_100"
+VAL_TRACE_DIR = "../data/synthetic-train/val_maxBW_2"
 
 os.makedirs(TRAIN_TRACE_DIR, exist_ok=True)
 os.makedirs(VAL_TRACE_DIR, exist_ok=True)
@@ -46,7 +46,7 @@ os.makedirs(VAL_TRACE_DIR, exist_ok=True)
 
 # large range
 T_s_min = 1
-T_s_max = 10
+T_s_max = 5
 T_l_min = 1
 T_l_max = 200
 cov_min = 0.01
@@ -56,8 +56,8 @@ duration_max = 3000
 
 # generate 66 files, each 2000 seconds for training
 MAX_TASK_CNT = 32
-MIN_THROUGHPUT = 20
-MAX_THROUGHPUT = 100
+MIN_THROUGHPUT = 0.2
+MAX_THROUGHPUT = 2
 STEPS = 10
 
 cmds = []
@@ -68,7 +68,7 @@ for y in range(1, STEPS-1):
     eq += (1/x**y)
 res = solve(eq, x)
 switch_parameter = N(res[0])
-for i in range(1000, 1200):
+for i in range(0, 600):
     name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
     print("create ", name)
     T_l = random.uniform(T_l_min, T_l_max)
@@ -84,7 +84,7 @@ for i in range(1000, 1200):
                 max_throughput, min_throughput, name)
     cmds.append(cmd.split(" "))
 
-for i in range(1200, 1300):
+for i in range(600, 800):
     name = os.path.join(VAL_TRACE_DIR, f"trace{i}.txt")
     print("create ", name)
     T_l = random.uniform(T_l_min, T_l_max)

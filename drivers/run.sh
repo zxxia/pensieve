@@ -22,7 +22,7 @@ LOG_FILES=( '1')
 
 
 # NN_MODELS="../results/synthetic-train/train-2000-trace-train100/model_saved/nn_model_ep_4400.ckpt"
-NN_MODELS="../results/synthetic-train/maxBW-60-100/1-bitrate-10-train-100/model_saved/nn_model_ep_51200.ckpt"
+NN_MODELS="../results/synthetic-train/mpc-6-train/bitrate-6-train-100/nn_model_ep_12600.ckpt"
 
 #NN_MODELS=(
 #"../results/Norway-DR-train/multiply-norm-0-1-train/model_saved/nn_model_ep_31000.ckpt"
@@ -30,14 +30,14 @@ NN_MODELS="../results/synthetic-train/maxBW-60-100/1-bitrate-10-train-100/model_
 #)
 #RANDOM_SEED=41
 
-TRACE_PATH="../data/synthetic-train-60-100/train_maxBW_100/"
+TRACE_PATH="../data/synthetic-train/train_maxBW_100/"
 SUMMARY_DIR="../results/synthetic-test/test-on-train_maxBW/rl-train-100/"
 
 #for i_folder in 5 10 20 30 40 50 60 70 80 90 100; do
 ##for i_folder in 90 100; do
 #
 #        TRACE_PATH="../data/synthetic-test/test_more_bitrate/test_on_${i_folder}"
-#        SUMMARY_DIR="../results/synthetic-test/more-bitrate-tmp/bitrate-10-train-100-51200/test-on-${i_folder}"
+#        SUMMARY_DIR="../results/synthetic-test/mpc-6-train/bitrate-6-train-100/test-on-${i_folder}"
 
 #        for ((i=0;i<${#NN_MODELS[@]};++i)); do
             python ${SIMULATOR_DIR}/rl_test.py \
