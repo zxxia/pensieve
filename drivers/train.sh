@@ -25,7 +25,7 @@ SIMULATOR_DIR="../sim"
 
 SUMMARY_DIR_1="../results/synthetic-train/mpc-6-train-subset/bitrate-6-train-2"
 python ${SIMULATOR_DIR}/multi_agent.py \
-    --NUM_AGENTS=12\
+    --NUM_AGENTS=8\
     --RANDOM_SEED=171\
     --train_trace_dir ${TRAIN_TRACE_PATH_1} \
     --val_trace_dir ${VAL_TRACE_PATH_1} \
