@@ -445,7 +445,7 @@ def central_agent(args, net_params_queues, exp_queues):
                     # Save the neural net parameters to disk.
                     save_path = saver.save(
                         sess,
-                        os.path.join(args.summary_dir, f"nn_model_ep_{epoch}.ckpt"))
+                        os.path.join(args.summary_dir, "nn_model_ep_{}.ckpt".format(epoch)))
                     logging.info("Model saved in file: " + save_path)
 
             end_t = time.time()
@@ -461,7 +461,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
                               random_seed=agent_id)
 
     with tf.Session() as sess, open(os.path.join(
-            args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:
+            args.summary_dir, 'log_agent_{}'.format(agent_id)), 'w') as log_file:
 
         log_file.write('\t'.join(['time_stamp', 'bit_rate', 'buffer_size',
                        'rebuffer', 'video_chunk_size', 'delay', 'reward',
