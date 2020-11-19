@@ -397,13 +397,13 @@ def central_agent(args, net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
-                _ = testing(args, epoch, actor, train_e2e_log_file,
-                            args.train_trace_dir,
-                            os.path.join(args.summary_dir, 'test_results'),
-                            args.noise, args.duration)
-                _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
-                            os.path.join(args.summary_dir, 'test_results'),
-                            args.noise, args.duration)
+                # _ = testing(args, epoch, actor, train_e2e_log_file,
+                #             args.train_trace_dir,
+                #             os.path.join(args.summary_dir, 'test_results'),
+                #             args.noise, args.duration)
+                # _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
+                #             os.path.join(args.summary_dir, 'test_results'),
+                #             args.noise, args.duration)
 
                 # Visdom log and plot
                 test_mean_reward = testing(
