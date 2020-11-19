@@ -399,6 +399,7 @@ def main():
     # make chunk combination options
     for combo in itertools.product([0, 1, 2, 3, 4, 5], repeat=5):
         CHUNK_COMBO_OPTIONS.append(combo)
+    # print(CHUNK_COMBO_OPTIONS)
 
     #CHUNK_COMBO_OPTIONS = np.stack( np.meshgrid(([0], [1], [2], [3], [4], [5], [6], [7], [8], [9]))).reshape( -1 ,9 )
     # for combo in itertools.product( np.arange( 0, 10, 1 ) ,repeat=10 ):

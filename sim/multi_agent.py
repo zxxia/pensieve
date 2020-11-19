@@ -89,7 +89,7 @@ def test(args, test_traces_dir, actor, log_output_dir, noise, duration):
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
-                              random_seed=args.RANDOM_SEED)
+                              random_seed=args.RANDOM_SEED,fixed=True)
 
     log_path = os.path.join(log_output_dir, 'log_sim_rl_{}'.format(
                             all_file_names[net_env.trace_idx]))
@@ -470,7 +470,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, net_params_queue,
 
     net_env = env.Environment(all_cooked_time=all_cooked_time,
                               all_cooked_bw=all_cooked_bw,
-                              random_seed=agent_id)
+                              random_seed=agent_id,fixed=True)
 
     with tf.Session() as sess, open(os.path.join(
             args.summary_dir, f'log_agent_{agent_id}'), 'w') as log_file:

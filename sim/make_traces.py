@@ -7,13 +7,14 @@ from sympy import N, Symbol, solve
 
 # 68 files with 2000 seconds, 205 files with 320 seconds
 
-TRAIN_TRACE_DIR = "../data/synthetic-train/train_maxBW_2"
-# TEST_TRACE_DIR = "../data/synthetic-test/test_more_bitrate_1000"
-VAL_TRACE_DIR = "../data/synthetic-train/val_maxBW_2"
+# TRAIN_TRACE_DIR = "../data/synthetic-train-close-random/train_maxBW_2"
+# VAL_TRACE_DIR = "../data/synthetic-train-close-random/val_maxBW_2"
+TEST_TRACE_DIR = "../data/synthetic-train-close-random/test_maxBW_5"
+
 
 os.makedirs(TRAIN_TRACE_DIR, exist_ok=True)
 os.makedirs(VAL_TRACE_DIR, exist_ok=True)
-#os.makedirs(TEST_TRACE_DIR, exist_ok=True)
+# os.makedirs(TEST_TRACE_DIR, exist_ok=True)
 
 # T_s_min = 10
 # T_s_max = 100
@@ -53,11 +54,12 @@ cov_min = 0.01
 cov_max = 0.7
 duration_min = 1000
 duration_max = 3000
+fix_duration=200
 
 # generate 66 files, each 2000 seconds for training
 MAX_TASK_CNT = 32
 MIN_THROUGHPUT = 0.2
-MAX_THROUGHPUT = 2
+MAX_THROUGHPUT = 5
 STEPS = 10
 
 cmds = []
@@ -68,56 +70,60 @@ for y in range(1, STEPS-1):
     eq += (1/x**y)
 res = solve(eq, x)
 switch_parameter = N(res[0])
-for i in range(0, 600):
-    name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
-    print("create ", name)
-    T_l = random.uniform(T_l_min, T_l_max)
-    T_s = random.uniform(T_s_min, T_s_max)
-    cov = random.uniform(cov_min, cov_max)
-    duration = random.uniform(duration_min, duration_max)
-    max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-    cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-        "--min-throughput {} --output_file {}".format(
-                T_l, T_s, cov, duration, STEPS, switch_parameter,
-                max_throughput, min_throughput, name)
-    cmds.append(cmd.split(" "))
 
-for i in range(600, 800):
-    name = os.path.join(VAL_TRACE_DIR, f"trace{i}.txt")
-    print("create ", name)
-    T_l = random.uniform(T_l_min, T_l_max)
-    T_s = random.uniform(T_s_min, T_s_max)
-    cov = random.uniform(cov_min, cov_max)
-    duration = random.uniform(duration_min, duration_max)
-    max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-    min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-    cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-        "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-        "--min-throughput {} --output_file {}".format(
-                T_l, T_s, cov, duration, STEPS, switch_parameter,
-                max_throughput, min_throughput, name)
-    cmds.append(cmd.split(" "))
+# for i in range(0, 3000):
+#     name = os.path.join(TRAIN_TRACE_DIR, f"trace{i}.txt")
+#     print("create ", name)
+#     T_l = random.uniform(T_l_min, T_l_max)
+#     T_s = random.uniform(T_s_min, T_s_max)
+#     cov = random.uniform(cov_min, cov_max)
+#     #duration = random.uniform(duration_min, duration_max)
+#     duration=fix_duration
+#     max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+#     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+#     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+#         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+#         "--min-throughput {} --output_file {}".format(
+#                 T_l, T_s, cov, duration, STEPS, switch_parameter,
+#                 max_throughput, min_throughput, name)
+#     cmds.append(cmd.split(" "))
+#
+# for i in range(3000, 3800):
+#     name = os.path.join(VAL_TRACE_DIR, f"trace{i}.txt")
+#     print("create ", name)
+#     T_l = random.uniform(T_l_min, T_l_max)
+#     T_s = random.uniform(T_s_min, T_s_max)
+#     cov = random.uniform(cov_min, cov_max)
+#     #duration = random.uniform(duration_min, duration_max)
+#     duration=fix_duration
+#     max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+#     min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+#     cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+#         "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+#         "--min-throughput {} --output_file {}".format(
+#                 T_l, T_s, cov, duration, STEPS, switch_parameter,
+#                 max_throughput, min_throughput, name)
+#     cmds.append(cmd.split(" "))
 
-# for x in range(10, 101, 10):
-#     MAX_THROUGHPUT = x
-#     for i in range(800, 1800):
-#         os.makedirs(TEST_TRACE_DIR+"/test_on_"+str(x), exist_ok=True)
-#         name = os.path.join(TEST_TRACE_DIR+"/test_on_"+str(x), f"trace{i}.txt")
-#         print("create ", name)
-#         T_l = random.uniform(T_l_min, T_l_max)
-#         T_s = random.uniform(T_s_min, T_s_max)
-#         cov = random.uniform(cov_min, cov_max)
-#         duration = random.uniform(duration_min, duration_max)
-#         max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
-#         min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
-#         cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
-#             "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
-#             "--min-throughput {} --output_file {}".format(
-#                     T_l, T_s, cov, duration, STEPS, switch_parameter,
-#                     max_throughput, min_throughput, name)
-#         cmds.append(cmd.split(' '))
+# #for x in range(10, 101, 10):
+# MAX_THROUGHPUT = 2
+# x=2
+for i in range(1000, 1200):
+        os.makedirs(TEST_TRACE_DIR+"/test_on_"+str(x), exist_ok=True)
+        name = os.path.join(TEST_TRACE_DIR+"/test_on_"+str(x), f"trace{i}.txt")
+        print("create ", name)
+        T_l = random.uniform(T_l_min, T_l_max)
+        T_s = random.uniform(T_s_min, T_s_max)
+        cov = random.uniform(cov_min, cov_max)
+        duration = random.uniform(duration_min, duration_max)
+        max_throughput = round(random.uniform(MIN_THROUGHPUT, MAX_THROUGHPUT),1)
+        min_throughput = random.uniform(MIN_THROUGHPUT, max_throughput)
+        cmd = "python synthetic_traces.py --T_l {} --T_s {} --cov {} " \
+            "--duration {} --steps {} --switch-parameter {} --max-throughput {} " \
+            "--min-throughput {} --output_file {}".format(
+                    T_l, T_s, cov, duration, STEPS, switch_parameter,
+                    max_throughput, min_throughput, name)
+        cmds.append(cmd.split(' '))
 
 
 while True:
