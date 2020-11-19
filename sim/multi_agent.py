@@ -265,8 +265,8 @@ def central_agent(args, net_params_queues, exp_queues):
     with tf.Session() as sess, \
             open(os.path.join(args.summary_dir, 'log_test'), 'w', 1) as test_log_file, \
             open(os.path.join(args.summary_dir, 'log_train'), 'w', 1) as log_central_file, \
-            open(os.path.join(args.summary_dir, 'log_val'), 'w', 1) as val_log_file, \
-            open(os.path.join(args.summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
+            open(os.path.join(args.summary_dir, 'log_val'), 'w', 1) as val_log_file:
+            #open(os.path.join(args.summary_dir, 'log_train_e2e'), 'w', 1) as train_e2e_log_file:
         log_writer = csv.writer(log_central_file, delimiter='\t')
         log_writer.writerow(['epoch', 'loss', 'avg_reward', 'avg_entropy'])
         test_log_file.write("\t".join(
@@ -275,9 +275,9 @@ def central_agent(args, net_params_queues, exp_queues):
         val_log_file.write("\t".join(
             ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
              'rewards_median', 'rewards_95per', 'rewards_max\n']))
-        train_e2e_log_file.write("\t".join(
-            ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
-             'rewards_median', 'rewards_95per', 'rewards_max\n']))
+        # train_e2e_log_file.write("\t".join(
+        #     ['epoch', 'rewards_min', 'rewards_5per', 'rewards_mean',
+        #      'rewards_median', 'rewards_95per', 'rewards_max\n']))
 
         actor = a3c.ActorNetwork(sess,
                                  state_dim=[args.S_INFO,
@@ -393,13 +393,13 @@ def central_agent(args, net_params_queues, exp_queues):
             writer.flush()
 
             if epoch % MODEL_SAVE_INTERVAL == 0:
-                _ = testing(args, epoch, actor, train_e2e_log_file,
-                            args.train_trace_dir,
-                            os.path.join(args.summary_dir, 'test_results'),
-                            args.noise, args.duration)
-                _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
-                            os.path.join(args.summary_dir, 'test_results'),
-                            args.noise, args.duration)
+                # _ = testing(args, epoch, actor, train_e2e_log_file,
+                #             args.train_trace_dir,
+                #             os.path.join(args.summary_dir, 'test_results'),
+                #             args.noise, args.duration)
+                # _ = testing(args, epoch, actor, test_log_file, args.test_trace_dir,
+                #             os.path.join(args.summary_dir, 'test_results'),
+                #             args.noise, args.duration)
 
                 # Visdom log and plot
                 test_mean_reward = testing(
