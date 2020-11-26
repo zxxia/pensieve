@@ -3,6 +3,9 @@ import os
 import numpy as np
 import random
 
+from constants import (VIDEO_BIT_RATE, HD_REWARD,
+                       SMOOTH_PENALTY, REBUF_PENALTY, M_IN_K)
+
 NAMES = ['timestamp', 'bandwidth']
 
 
@@ -138,3 +141,38 @@ def adjust_n_random_traces(all_ts, all_bw, random_seed, robust_noise, sample_len
     assert len(new_all_bw) == len(all_bw)
 
     return new_all_ts, new_all_bw
+
+
+def linear_reward(current_bitrate_idx, last_bitrate_idx, rebuffer):
+    current_bitrate = VIDEO_BIT_RATE[current_bitrate_idx]
+    last_bitrate = VIDEO_BIT_RATE[last_bitrate_idx]
+    reward = current_bitrate / M_IN_K - REBUF_PENALTY * rebuffer - \
+        SMOOTH_PENALTY * np.abs(current_bitrate - last_bitrate) / M_IN_K
+    return reward
+
+
+def opposite_linear_reward(current_bitrate_idx, last_bitrate_idx, rebuffer):
+    """Return linear reward which encourages rebuffering and bitrate switching.
+    """
+    current_bitrate = VIDEO_BIT_RATE[current_bitrate_idx]
+    last_bitrate = VIDEO_BIT_RATE[last_bitrate_idx]
+    reward = current_bitrate / M_IN_K + REBUF_PENALTY * rebuffer + \
+        SMOOTH_PENALTY * np.abs(current_bitrate - last_bitrate) / M_IN_K
+    return reward
+
+
+def log_scale_reward(current_bitrate_idx, last_bitrate_idx, rebuffer):
+    current_bitrate = VIDEO_BIT_RATE[current_bitrate_idx]
+    last_bitrate = VIDEO_BIT_RATE[last_bitrate_idx]
+    log_bit_rate = np.log(current_bitrate / VIDEO_BIT_RATE[-1])
+    log_last_bit_rate = np.log(last_bitrate / VIDEO_BIT_RATE[-1])
+    reward = log_bit_rate - REBUF_PENALTY * rebuffer - SMOOTH_PENALTY * \
+        np.abs(log_bit_rate - log_last_bit_rate)
+    return reward
+
+
+def hd_reward(current_bitrate_idx, last_bitrate_idx, rebuffer):
+    reward = HD_REWARD[current_bitrate_idx] - \
+        REBUF_PENALTY * rebuffer - SMOOTH_PENALTY * \
+        np.abs(HD_REWARD[current_bitrate_idx] - HD_REWARD[last_bitrate_idx])
+    return reward

@@ -1,39 +1,22 @@
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import argparse
 import os
-from utils.utils import adjust_traces, load_traces
+
 import a3c
-# import fixed_env as env
 import env
 import numpy as np
+import tensorflow as tf
+from constants import (A_DIM, BUFFER_NORM_FACTOR, DEFAULT_QUALITY, M_IN_K,
+                       RANDOM_SEED, S_INFO, S_LEN, VIDEO_BIT_RATE)
+
+from utils.utils import adjust_traces, linear_reward, load_traces
+
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 tf.logging.set_verbosity(tf.logging.INFO)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-# bit_rate, buffer_size, next_chunk_size, bandwidth_measurement(throughput and time), chunk_til_video_end
-S_INFO = 6
-S_LEN = 8  # take how many frames in the past
-A_DIM = 6
-ACTOR_LR_RATE = 0.0001
-CRITIC_LR_RATE = 0.001
-VIDEO_BIT_RATE = [300, 750, 1200, 1850, 2850, 4300]  # Kbps
-BUFFER_NORM_FACTOR = 10.0
-CHUNK_TIL_VIDEO_END_CAP = 48.0
-M_IN_K = 1000.0
-REBUF_PENALTY = 4.3  # 1 sec rebuffering -> 3 Mbps
-SMOOTH_PENALTY = 1
-DEFAULT_QUALITY = 1  # default video quality without agent
-RANDOM_SEED = 42
-RAND_RANGE = 1000
-# LOG_FILE = './test_results/log_sim_rl'
-# TEST_TRACES = './cooked_test_traces/'
-# TEST_TRACES = './test_sim_traces/'
-# TEST_TRACES = '../data/val/'
-# log in format of time_stamp bit_rate buffer_size rebuffer_time chunk_size download_time reward
 
 
 def parse_args():
@@ -47,6 +30,10 @@ def parse_args():
                         help='model path')
     parser.add_argument("--noise", type=float, default=0,)
     parser.add_argument("--duration", type=float, default=1.0)
+    parser.add_argument("--env-random-start", action="store_true",
+                        help='environment will not randomly start a new trace'
+                        'in training stage if environment is not fixed if '
+                        'specified.')
 
     return parser.parse_args()
 
@@ -69,9 +56,14 @@ def main():
         all_cooked_time, all_cooked_bw, bw_noise=args.noise,
         duration_factor=args.duration)
 
-    net_env = env.Environment(all_cooked_time=all_cooked_time,
-                              all_cooked_bw=all_cooked_bw,
-                              all_file_names=all_file_names, fixed=True)
+    if args.env_random_start:
+        net_env = env.Environment(all_cooked_time=all_cooked_time,
+                                  all_cooked_bw=all_cooked_bw,
+                                  all_file_names=all_file_names, fixed=True)
+    else:
+        net_env = env.EnvironmentNoRandomStart(
+            all_cooked_time=all_cooked_time, all_cooked_bw=all_cooked_bw,
+            all_file_names=all_file_names, fixed=True)
 
     log_path = os.path.join(summary_dir, 'log_sim_rl_' +
                             all_file_names[net_env.trace_idx])
@@ -79,8 +71,8 @@ def main():
 
     with tf.Session() as sess:
 
-        actor = a3c.ActorNetwork(sess,
-                                 state_dim=[S_INFO, S_LEN], action_dim=A_DIM)
+        actor = a3c.ActorNetwork(sess, state_dim=[S_INFO, S_LEN],
+                                 action_dim=A_DIM)
 
         sess.run(tf.global_variables_initializer())
         saver = tf.train.Saver()  # save neural net parameters
@@ -115,12 +107,10 @@ def main():
 
             time_stamp += delay  # in ms
             time_stamp += sleep_time  # in ms
+            # print(time_stamp, net_env.trace_time[-1], video_chunk_remain)
 
             # reward is video quality - rebuffer penalty - smoothness
-            reward = VIDEO_BIT_RATE[bit_rate] / M_IN_K \
-                - REBUF_PENALTY * rebuf \
-                - SMOOTH_PENALTY * np.abs(VIDEO_BIT_RATE[bit_rate] -
-                                          VIDEO_BIT_RATE[last_bit_rate]) / M_IN_K
+            reward = linear_reward(bit_rate, last_bit_rate, rebuf)
 
             r_batch.append(reward)
 
@@ -154,17 +144,19 @@ def main():
             state[3, -1] = float(delay) / M_IN_K / BUFFER_NORM_FACTOR  # 10 sec
             state[4, :A_DIM] = np.array(
                 next_video_chunk_sizes) / M_IN_K / M_IN_K  # mega byte
-            state[5, -1] = np.minimum(
-                video_chunk_remain,
-                CHUNK_TIL_VIDEO_END_CAP) / float(CHUNK_TIL_VIDEO_END_CAP)
+            # state[5, -1] = np.minimum(
+            #     video_chunk_remain,
+            #     CHUNK_TIL_VIDEO_END_CAP) / float(CHUNK_TIL_VIDEO_END_CAP)
+            state[5, -1] = video_chunk_remain / net_env.total_video_chunk
 
             action_prob = actor.predict(np.reshape(state, (1, S_INFO, S_LEN)))
-            action_cumsum = np.cumsum(action_prob)
+            # action_cumsum = np.cumsum(action_prob)
             # bit_rate = (action_cumsum > np.random.randint(
             #     1, RAND_RANGE) / float(RAND_RANGE)).argmax()
             bit_rate = action_prob.argmax()
-            # Note: we need to discretize the probability into 1/RAND_RANGE steps,
-            # because there is an intrinsic discrepancy in passing single state and batch states
+            # Note: we need to discretize the probability into 1/RAND_RANGE
+            # steps, because there is an intrinsic discrepancy in passing
+            # single state and batch states
 
             s_batch.append(state)
 
@@ -177,9 +169,9 @@ def main():
                 last_bit_rate = DEFAULT_QUALITY
                 bit_rate = DEFAULT_QUALITY  # use the default action here
 
-                del s_batch[:]
-                del a_batch[:]
-                del r_batch[:]
+                s_batch = []
+                a_batch = []
+                r_batch = []
 
                 action_vec = np.zeros(A_DIM)
                 action_vec[bit_rate] = 1

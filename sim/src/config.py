@@ -54,6 +54,12 @@ def parse_args():
                         help='model path')
     parser.add_argument("--noise", type=float, default=0,)
     parser.add_argument("--duration", type=float, default=1.0)
+    parser.add_argument("--env-random-start", action="store_true",
+                        help='environment will randomly start a new trace'
+                        'in training stage if environment is not fixed if '
+                        'specified.')
+    parser.add_argument("--no-agent-logging", action="store_true",
+                        help='individual agent will not log if specified.')
 
     return parser.parse_args()
 
