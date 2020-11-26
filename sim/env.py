@@ -205,6 +205,7 @@ class EnvironmentNoRandomStart:
                 for line in f:
                     self.video_size[bitrate].append(int(line.split()[0]))
         self.total_video_chunk = max(TOTAL_VIDEO_CHUNK, self.trace_time[-1]//4)
+        self.buffer_thresh = BUFFER_THRESH
 
     def get_video_chunk(self, quality):
 
@@ -266,11 +267,11 @@ class EnvironmentNoRandomStart:
         # sleep if buffer gets too large
         # buffer is too full and we wait for some data to be consumed
         sleep_time = 0
-        if self.buffer_size > BUFFER_THRESH:
+        if self.buffer_size > self.buffer_thresh:
             # exceed the buffer limit
             # we need to skip some network bandwidth here
             # but do not add up the delay
-            drain_buffer_time = self.buffer_size - BUFFER_THRESH
+            drain_buffer_time = self.buffer_size - self.buffer_thresh
             sleep_time = np.ceil(drain_buffer_time/DRAIN_BUFFER_SLEEP_TIME) * \
                 DRAIN_BUFFER_SLEEP_TIME
             self.buffer_size -= sleep_time
@@ -321,6 +322,9 @@ class EnvironmentNoRandomStart:
             # note: trace file starts with time 0
             self.mahimahi_ptr = 1
             self.last_mahimahi_time = self.trace_time[self.mahimahi_ptr - 1]
+            self.buffer_thresh = np.random.randint(4, 3600) * 1000
+        # print(self.buffer_size, self.buffer_thresh)
+        # assert 40*1000 <= self.buffer_thresh <= 60 * 1000
 
         next_video_chunk_sizes = []
         for i in range(BITRATE_LEVELS):

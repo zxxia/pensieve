@@ -562,7 +562,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
 
             entropy_record.append(a3c.compute_entropy(action_prob[0]))
 
-            if not args.no_agent_logging:
+            if not args.no_agent_logging and epoch % MODEL_SAVE_INTERVAL:
                 # log time_stamp, bit_rate, buffer_size, reward
                 log_file.write(str(time_stamp) + '\t' +
                                str(VIDEO_BIT_RATE[bit_rate]) + '\t' +
