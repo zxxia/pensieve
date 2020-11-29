@@ -16,9 +16,6 @@ VIDEO_BIT_RATE = np.array(VIDEO_BIT_RATE)  # Kbps
 
 CHUNK_COMBO_OPTIONS = []
 
-# past errors in bandwidth
-past_errors = []
-past_bandwidth_ests = []
 
 size_video1 = np.array(
     [2354772, 2123065, 2177073, 2160877, 2233056, 1941625, 2157535,
@@ -232,6 +229,9 @@ def main():
     s_batch = [np.zeros((S_INFO, S_LEN))]
     a_batch = [action_vec]
     r_batch = []
+    # past errors in bandwidth
+    past_errors = []
+    past_bandwidth_ests = []
 
     video_count = 0
     future_bandwidth = 0
@@ -345,10 +345,13 @@ def main():
 
             last_bit_rate = DEFAULT_QUALITY
             bit_rate = DEFAULT_QUALITY  # use the default action here
+            future_bandwidth = 0
 
             s_batch = []
             a_batch = []
             r_batch = []
+            past_errors = []
+            past_bandwidth_ests = []
 
             action_vec = np.zeros(A_DIM)
             action_vec[bit_rate] = 1
