@@ -1,11 +1,165 @@
-from constants import (RANDOM_SEED, BITRATE_LEVELS, LINK_RTT, BITS_IN_BYTE,
-                       B_IN_MB, PACKET_PAYLOAD_PORTION, MILLISECONDS_IN_SECOND,
-                       VIDEO_CHUNK_LEN, NOISE_LOW, NOISE_HIGH, BUFFER_THRESH,
-                       DRAIN_BUFFER_SLEEP_TIME, TOTAL_VIDEO_CHUNK)
-import numpy as np
+import os
 
+import numpy as np
+from constants import (B_IN_MB, BITRATE_LEVELS, BITS_IN_BYTE, BUFFER_THRESH,
+                       DRAIN_BUFFER_SLEEP_TIME, LINK_RTT,
+                       MILLISECONDS_IN_SECOND, NOISE_HIGH, NOISE_LOW,
+                       PACKET_PAYLOAD_PORTION, RANDOM_SEED, TOTAL_VIDEO_CHUNK,
+                       VIDEO_BIT_RATE, VIDEO_CHUNK_LEN)
 
 VIDEO_SIZE_FILE = '../data/video_sizes/video_size_'
+
+
+class BaseEnvironment:
+    def __init__(self, link_rtt, buffer_thresh, drain_buffer_sleep_time,
+                 packet_payload_portion):
+        self.link_rtt = link_rtt
+        self.buffer_thresh = buffer_thresh
+        self.drain_buffer_sleep_time = drain_buffer_sleep_time
+        self.packet_payload_portion = packet_payload_portion
+
+    def get_video_chunk(self, quality):
+        raise NotImplementedError
+
+
+class NetworkEnvironment(BaseEnvironment):
+    def __init__(self, trace_time, trace_bw, trace_file_name,
+                 video_size_file_dir, trace_video_same_duration_flag=False,
+                 link_rtt=LINK_RTT, buffer_thresh=BUFFER_THRESH,
+                 drain_buffer_sleep_time=DRAIN_BUFFER_SLEEP_TIME,
+                 packet_payload_portion=PACKET_PAYLOAD_PORTION, fixed=True):
+        super().__init__(link_rtt, buffer_thresh, drain_buffer_sleep_time,
+                         packet_payload_portion)
+        self.trace_time = trace_time
+        self.trace_bw = trace_bw
+        self.trace_file_name = trace_file_name
+        self.trace_video_same_duration_flag = trace_video_same_duration_flag
+        self.trace_ptr = 1
+        self.last_trace_ts = self.trace_time[self.trace_ptr - 1]
+        self.nb_chunk_sent = 0
+        self.buffer_size = 0
+        self.fixed = fixed
+
+        self.video_size = {}  # in bytes
+        for bitrate in range(len(VIDEO_BIT_RATE)):
+            self.video_size[bitrate] = []
+            video_size_file = os.path.join(video_size_file_dir,
+                                           'video_size_{}'.format(bitrate))
+            with open(video_size_file, 'r') as f:
+                for line in f:
+                    self.video_size[bitrate].append(int(line.split()[0]))
+
+        if trace_video_same_duration_flag:
+            self.total_video_chunk = max(
+                TOTAL_VIDEO_CHUNK,
+                self.trace_time[-1]*MILLISECONDS_IN_SECOND//VIDEO_CHUNK_LEN)
+        else:
+            self.total_video_chunk = TOTAL_VIDEO_CHUNK
+
+    def get_video_chunk(self, quality):
+        assert 0 <= quality < len(VIDEO_BIT_RATE)
+
+        video_chunk_size = self.video_size[quality][
+            self.nb_chunk_sent % TOTAL_VIDEO_CHUNK]
+
+        # use the delivery opportunity in mahimahi
+        delay = 0.0  # in ms
+        bytes_sent = 0  # in bytes
+
+        while True:  # download video chunk over mahimahi
+            # throughput = bytes per ms
+            throughput = self.trace_bw[self.trace_ptr] * B_IN_MB / BITS_IN_BYTE
+            duration = self.trace_time[self.trace_ptr] - self.last_trace_ts
+
+            packet_payload = throughput * duration * self.packet_payload_portion
+
+            if bytes_sent + packet_payload > video_chunk_size:
+
+                fractional_time = (video_chunk_size - bytes_sent) / \
+                    throughput / self.packet_payload_portion
+                delay += fractional_time
+                self.last_trace_ts += fractional_time
+                assert(self.last_trace_ts <= self.trace_time[self.trace_ptr])
+                break
+
+            bytes_sent += packet_payload
+            delay += duration
+            self.last_trace_ts = self.trace_time[self.trace_ptr]
+            self.trace_ptr += 1
+
+            if self.trace_ptr >= len(self.trace_bw):
+                # loop back in the beginning
+                # note: trace file starts with time 0
+                self.trace_ptr = 1
+                self.last_trace_ts = 0
+
+        delay *= MILLISECONDS_IN_SECOND
+        delay += self.link_rtt
+
+        # add a multiplicative noise to the delay
+        if not self.fixed:
+            delay *= np.random.uniform(NOISE_LOW, NOISE_HIGH)
+
+        # rebuffer time
+        rebuf = np.maximum(delay - self.buffer_size, 0.0)
+
+        # update the buffer
+        self.buffer_size = np.maximum(self.buffer_size - delay, 0.0)
+
+        # add in the new chunk
+        self.buffer_size += VIDEO_CHUNK_LEN
+
+        # sleep if buffer gets too large
+        sleep_time = 0
+        if self.buffer_size > self.buffer_thresh:
+            # exceed the buffer limit
+            # we need to skip some network bandwidth here
+            # but do not add up the delay
+            drain_buffer_time = self.buffer_size - self.buffer_thresh
+            sleep_time = np.ceil(drain_buffer_time /
+                                 self.drain_buffer_sleep_time) * \
+                self.drain_buffer_sleep_time
+            self.buffer_size -= sleep_time
+
+            while True:
+                duration = self.trace_time[self.trace_ptr] - self.last_trace_ts
+                if duration > sleep_time / MILLISECONDS_IN_SECOND:
+                    self.last_trace_ts += sleep_time / MILLISECONDS_IN_SECOND
+                    break
+                sleep_time -= duration * MILLISECONDS_IN_SECOND
+                self.last_trace_ts = self.trace_time[self.trace_ptr]
+                self.trace_ptr += 1
+
+                if self.trace_ptr >= len(self.trace_bw):
+                    # loop back in the beginning
+                    # note: trace file starts with time 0
+                    self.trace_ptr = 1
+                    self.last_trace_ts = self.trace_time[self.trace_ptr - 1]
+
+        # the "last buffer size" return to the controller
+        # Note: in old version of dash the lowest buffer is 0.
+        # In the new version the buffer always have at least
+        # one chunk of video
+        return_buffer_size = self.buffer_size
+
+        self.nb_chunk_sent += 1
+        video_chunk_remain = self.total_video_chunk - self.nb_chunk_sent
+
+        end_of_video = self.nb_chunk_sent >= self.total_video_chunk
+
+        next_video_chunk_sizes = []
+        for i in range(len(VIDEO_BIT_RATE)):
+            next_video_chunk_sizes.append(
+                self.video_size[i][self.nb_chunk_sent % TOTAL_VIDEO_CHUNK])
+
+        return delay, \
+            sleep_time, \
+            return_buffer_size / MILLISECONDS_IN_SECOND, \
+            rebuf / MILLISECONDS_IN_SECOND, \
+            video_chunk_size, \
+            next_video_chunk_sizes, \
+            end_of_video, \
+            video_chunk_remain
 
 
 class Environment:
@@ -323,6 +477,8 @@ class EnvironmentNoRandomStart:
             self.mahimahi_ptr = 1
             self.last_mahimahi_time = self.trace_time[self.mahimahi_ptr - 1]
             self.buffer_thresh = np.random.randint(4, 3600) * 1000
+            while 56000 <= self.buffer_thresh <= 64000:
+                self.buffer_thresh = np.random.randint(4, 300) * 1000
         # print(self.buffer_size, self.buffer_thresh)
         # assert 40*1000 <= self.buffer_thresh <= 60 * 1000
 

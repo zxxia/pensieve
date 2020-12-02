@@ -30,12 +30,22 @@ def parse_args():
                         required=True, help='output path.')
     parser.add_argument("--model_path", type=str, required=True,
                         help='model path')
+    parser.add_argument("--video-size-file-dir", type=str, required=True,
+                        help="dir to all video size files.")
     parser.add_argument("--noise", type=float, default=0,)
     parser.add_argument("--duration", type=float, default=1.0)
     parser.add_argument("--env-random-start", action="store_true",
                         help='environment will not randomly start a new trace'
                         'in training stage if environment is not fixed if '
                         'specified.')
+    parser.add_argument("--buffer-thresh", type=float, default=60,
+                        help='buffer threshold(sec)')
+    parser.add_argument("--link-rtt", type=float, default=80,
+                        help='link RTT(millisec)')
+    parser.add_argument("--drain-buffer-sleep-time", type=float, default=500,
+                        help='drain buffer sleep time(millisec)')
+    parser.add_argument("--packet-payload-portion", type=float, default=0.95,
+                        help='drain buffer sleep time(millisec)')
 
     return parser.parse_args()
 
@@ -131,19 +141,24 @@ def run_on_trace(nn_model, net_env, log_path):
                 break
 
 
-def run_multiple_traces(all_cooked_time, all_cooked_bw, all_file_names,
-                        nn_model, summary_dir, env_random_start):
+def run_multiple_traces(args, all_cooked_time, all_cooked_bw, all_file_names,
+                        nn_model, summary_dir):
     jobs = []
     for trace_idx, (trace_time, trace_bw, trace_filename) in enumerate(
             zip(all_cooked_time, all_cooked_bw, all_file_names)):
-        if env_random_start:
+        if args.env_random_start:
             net_env = env.Environment(all_cooked_time=[trace_time],
                                       all_cooked_bw=[trace_bw],
                                       fixed=True)
         else:
-            net_env = env.EnvironmentNoRandomStart(
-                all_cooked_time=[trace_time], all_cooked_bw=[trace_bw],
-                fixed=True)
+            net_env = env.NetworkEnvironment(
+                trace_time=trace_time, trace_bw=trace_bw,
+                video_size_file_dir=args.video_size_file_dir,
+                trace_file_name=trace_filename, link_rtt=args.link_rtt,
+                buffer_thresh=args.buffer_thresh*1000,
+                drain_buffer_sleep_time=args.drain_buffer_sleep_time,
+                packet_payload_portion=args.packet_payload_portion,
+                trace_video_same_duration_flag=True, fixed=True)
 
         log_path = os.path.join(
             summary_dir, 'log_sim_rl_' + trace_filename)
@@ -172,8 +187,8 @@ def main():
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw, bw_noise=args.noise,
         duration_factor=args.duration)
-    run_multiple_traces(all_cooked_time, all_cooked_bw, all_file_names,
-                        nn_model, summary_dir, args.env_random_start)
+    run_multiple_traces(args, all_cooked_time, all_cooked_bw, all_file_names,
+                        nn_model, summary_dir)
 
 
 if __name__ == '__main__':

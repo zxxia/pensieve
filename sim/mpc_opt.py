@@ -25,10 +25,20 @@ def parse_args():
     parser.add_argument("--summary_dir", type=str,
                         required=True, help='output path.')
     parser.add_argument("--random_seed", type=int, default=42)
+    parser.add_argument("--video-size-file-dir", type=str, required=True,
+                        help="dir to all video size files.")
     parser.add_argument("--env-random-start", action="store_true",
                         help='environment will randomly start a new trace'
                         'in training stage if environment is not fixed if '
                         'specified.')
+    parser.add_argument("--buffer-thresh", type=float, default=60,
+                        help='buffer threshold(sec)')
+    parser.add_argument("--link-rtt", type=float, default=80,
+                        help='link RTT(millisec)')
+    parser.add_argument("--drain-buffer-sleep-time", type=float, default=500,
+                        help='drain buffer sleep time(millisec)')
+    parser.add_argument("--packet-payload-portion", type=float, default=0.95,
+                        help='drain buffer sleep time(millisec)')
 
     return parser.parse_args()
 
@@ -56,8 +66,6 @@ def calculate_rebuffer(future_chunk_length, buffer_size, bit_rate, last_index,
             # e.g., if last chunk is 3, then first iter is 3+0+1=4
             index = last_index + position + 1
             # this is MB/MB/s --> seconds
-            # download_time = (get_chunk_size(
-            #     chunk_quality, index) / 1000000.) / future_bandwidth
             download_time = \
                 video_size[chunk_quality, index % TOTAL_VIDEO_CHUNK] / \
                 B_IN_MB / future_bandwidth
@@ -244,9 +252,14 @@ def main():
                                       all_file_names=[trace_filename],
                                       fixed=True)
         else:
-            net_env = env.EnvironmentNoRandomStart(
-                all_cooked_time=[trace_time], all_cooked_bw=[trace_bw],
-                all_file_names=[trace_filename], fixed=True)
+            net_env = env.NetworkEnvironment(
+                trace_time=trace_time, trace_bw=trace_bw,
+                video_size_file_dir=args.video_size_file_dir,
+                trace_file_name=trace_filename, link_rtt=args.link_rtt,
+                buffer_thresh=args.buffer_thresh*1000,
+                drain_buffer_sleep_time=args.drain_buffer_sleep_time,
+                packet_payload_portion=args.packet_payload_portion,
+                trace_video_same_duration_flag=True, fixed=True)
         log_path = os.path.join(args.summary_dir,
                                 'log_sim_mpc_' + trace_filename)
         p = mp.Process(target=run_on_trace,
