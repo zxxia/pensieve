@@ -620,7 +620,6 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
                 else:
                     link_rtt = args.link_rtt
                 trace_idx = np.random.randint(len(all_cooked_time))
-                print(agent_id, trace_idx)
                 net_env = env.NetworkEnvironment(
                     trace_time=all_cooked_time[trace_idx],
                     trace_bw=all_cooked_bw[trace_idx],
