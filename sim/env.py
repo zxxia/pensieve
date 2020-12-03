@@ -342,11 +342,11 @@ class EnvironmentNoRandomStart:
         # pick a random trace file
         self.trace_idx = 0 if fixed else np.random.randint(
             len(self.all_trace_time))  # index among all traces
+        self.trace_time = self.all_trace_time[self.trace_idx]
+        self.trace_bw = self.all_trace_bw[self.trace_idx]
         # trace ptr points a position on the network trace
         self.trace_ptr = 1 if fixed else np.random.randint(
             1, len(self.trace_bw))
-        self.trace_time = self.all_trace_time[self.trace_idx]
-        self.trace_bw = self.all_trace_bw[self.trace_idx]
 
         # randomize the start point of the trace
         # note: trace file starts with time 0

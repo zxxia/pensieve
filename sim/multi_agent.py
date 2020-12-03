@@ -573,7 +573,7 @@ def agent(args, agent_id, all_cooked_time, all_cooked_bw, all_file_names,
                                str(reward) + '\t' +
                                str(epoch) + '\t' +
                                str(net_env.trace_idx) + '\t' +
-                               str(net_env.mahimahi_ptr)+'\n')
+                               str(net_env.trace_ptr)+'\n')
                 log_file.flush()
 
             # report experience to the coordinator
