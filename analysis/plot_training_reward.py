@@ -37,7 +37,7 @@ axes[1].set_ylabel('Reward')
 axes[1].legend(loc='lower right')
 
 axes[2].plot(log_test['epoch'], log_test['rewards_mean'], label='Test')
-axes[1].set_title('Test')
+axes[2].set_title('Test')
 axes[2].set_xlabel('Epoch')
 axes[2].set_ylabel('Reward')
 axes[2].legend(loc='lower right')
