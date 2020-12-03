@@ -3,6 +3,17 @@ import logging
 import os
 
 
+def required_length(nmin, nmax):
+    class RequiredLength(argparse.Action):
+        def __call__(self, parser, args, values, option_string=None):
+            if not nmin <= len(values) <= nmax:
+                msg = 'argument "{f}" requires between {nmin} and {nmax} arguments'.format(
+                    f=self.dest, nmin=nmin, nmax=nmax)
+                raise argparse.ArgumentTypeError(msg)
+            setattr(args, self.dest, values)
+    return RequiredLength
+
+
 def parse_args():
     '''
     Parse arguments from the command line.
@@ -60,6 +71,14 @@ def parse_args():
                         'specified.')
     parser.add_argument("--no-agent-logging", action="store_true",
                         help='individual agent will not log if specified.')
+
+    # environment parameters
+    parser.add_argument("--buffer-thresh", type=int, default=60, nargs='+',
+                        action=required_length(1, 2),
+                        help='buffer threshold in second.')
+    parser.add_argument("--link-rtt", type=int, default=80, nargs='+',
+                        action=required_length(1, 2),
+                        help='link rtt in millisec.')
 
     return parser.parse_args()
 

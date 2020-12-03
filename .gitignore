@@ -9,3 +9,6 @@ __pycache__
 data/
 .ipynb_checkpoints
 results/
+analysis/
+traces/fcc/201608_simulation_traces/
+traces/fcc/data-dictionary-sept2015.xls
