@@ -10,7 +10,7 @@ DURATION=1
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../sim/test_sim_traces"
 # TRACE_PATH="../data/test"
-TRACE_PATH="../data/synthetic_traces/trace_to_test"
+TRACE_PATH="../data/synthetic_traces/trace_to_test_vary_duration_5500"
 # TRACE_PATH="../data/train"
 # TRACE_PATH="../data/Lesley_more_traces_for_pensieve/cooked_test_traces"
 # TRACE_PATH="../data/Lesley_more_traces_for_pensieve/cooked_traces"
@@ -90,7 +90,7 @@ for NOISE in 0 ; do
     SUMMARY_DIR="../results/synthetic_traces_duration_10_30_exp/noise_${NOISE}"
     SUMMARY_DIR="../results/synthetic_traces_duration_10_100_exp/noise_${NOISE}"
     SUMMARY_DIR="../results/synthetic_traces_duration_10_300_exp/noise_${NOISE}"
-    SUMMARY_DIR="../results/synthetic_traces_duration_10_500_exp/noise_${NOISE}"
+    # SUMMARY_DIR="../results/synthetic_traces_duration_10_500_exp/noise_${NOISE}"
     # python ${SIMULATOR_DIR}/bb.py \
     #     --test_trace_dir ${TRACE_PATH} \
     #     --summary_dir ${SUMMARY_DIR}/bb\
@@ -100,17 +100,20 @@ for NOISE in 0 ; do
     #     --test_trace_dir ${TRACE_PATH} \
     #     --summary_dir ${SUMMARY_DIR}/mpc\
     #     --noise ${NOISE} \
-    #     --duration ${DURATION} &
+    #     --duration ${DURATION} # &
+    python ${SIMULATOR_DIR}/mpc_optimized.py \
+        --test_trace_dir ${TRACE_PATH} \
+        --summary_dir ${SUMMARY_DIR}/mpc
     # cp -r ../results/entropy_weight_exp/noise_0/mpc ${SUMMARY_DIR}/
 
-    for ((i=0;i<${#NN_MODELS[@]};++i)); do
-        python ${SIMULATOR_DIR}/rl_test.py \
-            --test_trace_dir ${TRACE_PATH} \
-            --summary_dir ${SUMMARY_DIR}/sim_rl_train_noise${LOG_FILES[i]}\
-            --model_path ${NN_MODELS[i]} \
-            --noise ${NOISE} \
-            --duration ${DURATION}
-    done
+    # for ((i=0;i<${#NN_MODELS[@]};++i)); do
+    #     python ${SIMULATOR_DIR}/rl_test.py \
+    #         --test_trace_dir ${TRACE_PATH} \
+    #         --summary_dir ${SUMMARY_DIR}/sim_rl_train_noise${LOG_FILES[i]}\
+    #         --model_path ${NN_MODELS[i]} \
+    #         --noise ${NOISE} \
+    #         --duration ${DURATION}
+    # done
     # python ${SIMULATOR_DIR}/rl_test.py \
     #     --test_trace_dir ${TRACE_PATH} \
     #     --summary_dir ${SUMMARY_DIR}/sim_rl_pretrain \
