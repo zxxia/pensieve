@@ -361,7 +361,7 @@ class EnvironmentNoRandomStart:
         self.total_video_chunk = max(
             TOTAL_VIDEO_CHUNK,
             self.trace_time[-1]*MILLISECONDS_IN_SECOND//VIDEO_CHUNK_LEN)
-        self.buffer_thresh = np.random.randint(4, 20) * 1000
+        self.buffer_thresh = 60 * 1000 #np.random.randint(4, 20) * 1000
 
     def get_video_chunk(self, quality):
 
@@ -472,14 +472,14 @@ class EnvironmentNoRandomStart:
             # note: trace file starts with time 0
             self.trace_ptr = 1
             self.last_trace_ts = self.trace_time[self.trace_ptr - 1]
-            self.buffer_thresh = np.random.randint(4, 20) * 1000
-            while self.buffer_thresh == 4000 or self.buffer_thresh == 8000 or \
-                    self.buffer_thresh == 16000 or \
-                    self.buffer_thresh == 24000 or \
-                    self.buffer_thresh == 32000 or \
-                    self.buffer_thresh == 60000 or \
-                    self.buffer_thresh == 120000:
-                self.buffer_thresh = np.random.randint(4, 20) * 1000
+            # self.buffer_thresh = np.random.randint(4, 20) * 1000
+            # while self.buffer_thresh == 4000 or self.buffer_thresh == 8000 or \
+            #         self.buffer_thresh == 16000 or \
+            #         self.buffer_thresh == 24000 or \
+            #         self.buffer_thresh == 32000 or \
+            #         self.buffer_thresh == 60000 or \
+            #         self.buffer_thresh == 120000:
+            #     self.buffer_thresh = np.random.randint(4, 20) * 1000
         # print(self.buffer_size, self.buffer_thresh)
         # assert 40*1000 <= self.buffer_thresh <= 60 * 1000
 
