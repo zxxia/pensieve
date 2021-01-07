@@ -61,7 +61,7 @@ def run_on_trace(nn_model, net_env, log_path):
         # restore neural net parameters
         if nn_model is not None:  # NN_MODEL is the path to file
             saver.restore(sess, nn_model)
-            print("Testing model restored from {}.".format(nn_model))
+            # print("Testing model restored from {}.".format(nn_model))
         time_stamp = 0
 
         last_bit_rate = DEFAULT_QUALITY
@@ -137,7 +137,6 @@ def run_on_trace(nn_model, net_env, log_path):
             entropy_record.append(a3c.compute_entropy(action_prob[0]))
 
             if end_of_video:
-                print(log_path, "is done!!!!")
                 break
 
 
@@ -164,6 +163,7 @@ def run_multiple_traces(args, all_cooked_time, all_cooked_bw, all_file_names,
             summary_dir, 'log_sim_rl_' + trace_filename)
         p = mp.Process(target=run_on_trace,
                        args=(nn_model, net_env, log_path))
+        p.daemon = True
         jobs.append(p)
         p.start()
     for p in jobs:
@@ -183,7 +183,7 @@ def main():
 
     all_cooked_time, all_cooked_bw, all_file_names = load_traces(
         test_trace_dir)
-    print("Loaded {} traces." .format(len(all_file_names)))
+    # print("Loaded {} traces." .format(len(all_file_names)))
     all_cooked_time, all_cooked_bw = adjust_traces(
         all_cooked_time, all_cooked_bw, bw_noise=args.noise,
         duration_factor=args.duration)
@@ -194,4 +194,4 @@ def main():
 if __name__ == '__main__':
     t_start = time.time()
     main()
-    print("time used: {}".format(time.time() - t_start))
+    # print("time used: {}".format(time.time() - t_start))

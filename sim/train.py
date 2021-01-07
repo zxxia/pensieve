@@ -5,7 +5,7 @@ import csv
 import logging
 import multiprocessing as mp
 import os
-# import time
+import time
 from datetime import datetime
 
 import a3c
@@ -169,8 +169,13 @@ def testing(args, epoch, actor, log_file, trace_dir, test_log_folder, noise,
 
     # run test script
     print('test on buffer thresh {}'.format(buffer_thresh))
-    test(args, trace_dir, actor, test_log_folder, noise, duration,
-         buffer_thresh)
+    # test(args, trace_dir, actor, test_log_folder, noise, duration,
+    #      buffer_thresh)
+
+    cmd = "python ../sim/rl_test_opt.py --test_trace_dir {} --summary_dir {} "\
+           "--model_path {} --video-size-file-dir {} --buffer-thresh {}".format(
+            trace_dir, test_log_folder, actor, '../data/video_sizes', buffer_thresh)
+    os.system(cmd)
 
     # append test performance to the log
     rewards = []
@@ -308,6 +313,8 @@ def central_agent(args, net_params_queues, exp_queues):
             args.summary_dir, sess.graph)  # training monitor
         saver = tf.train.Saver(max_to_keep=20)  # save neural net parameters
 
+        tmp_saver = tf.train.Saver(max_to_keep=1)  # save neural net parameters
+
         # restore neural net parameters
         if args.nn_model is not None:  # nn_model is the path to file
             saver.restore(sess, args.nn_model)
@@ -318,6 +325,7 @@ def central_agent(args, net_params_queues, exp_queues):
         # assemble experiences from agents, compute the gradients
         max_avg_reward = None
         training_buffer_thresh_range = [60, 60]
+        t_start = time.time()
         while True:
             # start_t = time.time()
             # synchronize the network parameters of work agent
@@ -400,13 +408,18 @@ def central_agent(args, net_params_queues, exp_queues):
             writer.add_summary(summary_str, epoch)
             writer.flush()
 
+            tmp_save_path = tmp_saver.save(sess, os.path.join(
+                    args.summary_dir, "tmp_nn_model_ep.ckpt"))
             if epoch % MODEL_SAVE_INTERVAL == 0:
+                t_used = time.time() - t_start
+                print('epoch {} :{}s'.format(epoch, t_used))
+                t_start = time.time()
                 print('epoch', epoch - 1)
                 small_ranges = np.linspace(4, 124, 7)
                 all_val_rewards = []
                 all_mpc_val_rewards = []
                 for buffer_thresh in range(4, 124+1):
-                    _ = testing(args, epoch, actor, test_log_file,
+                    _ = testing(args, epoch, tmp_save_path, test_log_file,
                                 args.test_trace_dir,
                                 os.path.join(args.summary_dir, 'test_results'),
                                 args.noise, args.duration, buffer_thresh)
@@ -433,7 +446,7 @@ def central_agent(args, net_params_queues, exp_queues):
                         buffer_thresh)
                     all_mpc_val_rewards.append(mpc_val_reward)
                     test_mean_reward = testing(
-                        args, epoch, actor, val_log_file, args.val_trace_dir,
+                        args, epoch, tmp_save_path, val_log_file, args.val_trace_dir,
                         os.path.join(args.summary_dir, 'test_results'),
                         args.noise, args.duration, buffer_thresh)
                     all_val_rewards.append(test_mean_reward)
@@ -445,6 +458,7 @@ def central_agent(args, net_params_queues, exp_queues):
                 target_idx = np.argsort(reward_diffs)[-1]
                 training_buffer_thresh_range = [small_ranges[target_idx],
                                                 small_ranges[target_idx+1]]
+                # training_buffer_thresh_range = [60, 60]
                 print(all_mpc_val_rewards)
                 print(all_val_rewards)
                 # print(reward_diffs)
